@@ -1,0 +1,11 @@
+node_modules
+npm-debug.log
+.yarn-cache
+.pnp.js
+.pnp.cjs
+.pnpm-store
+*.log
+.DS_Store
+dist
+.git
+.github
