@@ -1,0 +1,42 @@
+name: PR → pr-latest (frontend)
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+  packages: write
+
+concurrency:
+  group: pr-latest-frontend
+  cancel-in-progress: true
+
+env:
+  IMAGE: ghcr.io/boldrqwe/instructions_front
+  VITE_API_BASE_URL: https://test.79.174.84.176.sslip.io
+
+jobs:
+  build-push:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build & push :pr-latest + :pr-<num>-<sha>
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          build-args: |
+            VITE_API_BASE_URL=${{ env.VITE_API_BASE_URL }}
+          tags: |
+            ${{ env.IMAGE }}:pr-latest
+            ${{ env.IMAGE }}:pr-${{ github.event.number }}-${{ github.sha }}
+
