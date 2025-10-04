@@ -1,0 +1,101 @@
+.root {
+  font-family: var(--font-sans);
+  color: var(--text);
+  display: grid;
+  gap: 1.5rem;
+  font-size: 1rem;
+}
+
+.root :is(h1, h2, h3, h4, h5, h6) {
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+.root h1 {
+  font-size: 2.5rem;
+}
+
+.root h2 {
+  font-size: 2rem;
+}
+
+.root h3 {
+  font-size: 1.5rem;
+}
+
+.root p {
+  margin: 0;
+}
+
+.root ul,
+.root ol {
+  padding-left: 1.5rem;
+  display: grid;
+  gap: 0.5rem;
+}
+
+.root blockquote {
+  margin: 0;
+  padding: 1rem 1.5rem;
+  border-left: 3px solid var(--primary);
+  background: rgba(99, 91, 255, 0.1);
+}
+
+.root pre {
+  background: #111827;
+  color: #f9fafb;
+  padding: 1rem;
+  border-radius: 0.75rem;
+  overflow-x: auto;
+  font-size: 0.875rem;
+}
+
+.root code {
+  background: rgba(99, 91, 255, 0.1);
+  border-radius: 0.25rem;
+  padding: 0.15rem 0.35rem;
+}
+
+.root pre code {
+  background: none;
+  padding: 0;
+}
+
+.root table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+}
+
+.root th,
+.root td {
+  border: 1px solid var(--border);
+  padding: 0.75rem;
+  text-align: left;
+}
+
+.root tbody tr:nth-child(even) {
+  background: rgba(99, 91, 255, 0.05);
+}
+
+.anchor {
+  text-decoration: none;
+  color: inherit;
+  position: relative;
+}
+
+.anchor::after {
+  content: '#';
+  position: absolute;
+  left: -1.5rem;
+  top: 50%;
+  transform: translateY(-50%);
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  color: var(--primary);
+}
+
+.anchor:hover::after,
+.anchor:focus-visible::after {
+  opacity: 1;
+}
