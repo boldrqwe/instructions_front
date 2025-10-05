@@ -1,10 +1,12 @@
-import { createContext, useContext, useState, useEffect } from 'react';
+import { createContext, useContext, useEffect, useState } from 'react';
 import type { ReactNode } from 'react';
+
+import { apiClient } from '../config/api';
 
 interface AuthContextType {
   token: string | null;
   isAdmin: boolean;
-  login: (u: string, p: string) => Promise<boolean>;
+  login: (username: string, password: string) => Promise<boolean>;
   logout: () => void;
 }
 
@@ -16,31 +18,53 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (!token) return;
-    fetch('/api/v1/auth/me', {
-      headers: { Authorization: `Bearer ${token}` }
-    })
-      .then(r => r.ok ? r.json() : Promise.reject())
-      .then(data => setIsAdmin(data.authenticated && data.roles?.includes('ROLE_ADMIN')))
-      .catch(() => {
+
+    let isCancelled = false;
+
+    async function loadProfile(authToken: string) {
+      try {
+        const data = await apiClient<AuthProfileResponse>('/auth/me', {
+          headers: { Authorization: `Bearer ${authToken}` },
+        });
+
+        if (isCancelled) {
+          return;
+        }
+
+        const hasAdminRole = Boolean(data.authenticated && data.roles?.includes('ROLE_ADMIN'));
+        setIsAdmin(hasAdminRole);
+      } catch {
+        if (isCancelled) {
+          return;
+        }
+
         setIsAdmin(false);
         setToken(null);
         localStorage.removeItem('token');
-      });
+      }
+    }
+
+    loadProfile(token);
+
+    return () => {
+      isCancelled = true;
+    };
   }, [token]);
 
   async function login(username: string, password: string): Promise<boolean> {
     try {
-      const resp = await fetch('/api/v1/auth/login', {
+      const data = await apiClient<AuthLoginResponse>('/auth/login', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, password })
+        body: JSON.stringify({ username, password }),
       });
-      if (!resp.ok) return false;
-      const data = await resp.json();
-      if (!data.token) return false;
+
+      if (!data?.token) {
+        return false;
+      }
+
       localStorage.setItem('token', data.token);
       setToken(data.token);
-      setIsAdmin(true);
+
       return true;
     } catch {
       return false;
@@ -53,11 +77,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     localStorage.removeItem('token');
   }
 
-  return (
-    <AuthContext.Provider value={{ token, isAdmin, login, logout }}>
-      {children}
-    </AuthContext.Provider>
-  );
+  return <AuthContext.Provider value={{ token, isAdmin, login, logout }}>{children}</AuthContext.Provider>;
 }
 
 export const useAuth = () => useContext(AuthContext);
+
+interface AuthProfileResponse {
+  readonly authenticated: boolean;
+  readonly roles?: string[];
+}
+
+interface AuthLoginResponse {
+  readonly token: string;
+}
