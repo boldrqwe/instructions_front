@@ -32,6 +32,6 @@ export function useSearchQuery(params: SearchParams, enabled = true) {
     queryKey: ['search', params] as const,
     queryFn: () => search(params),
     enabled: params.query.trim().length > 0 && enabled,
-    keepPreviousData: true,
+    placeholderData: (prev) => prev,
   });
 }
