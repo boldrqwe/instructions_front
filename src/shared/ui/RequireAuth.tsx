@@ -1,5 +1,5 @@
 import { Navigate, useLocation } from 'react-router-dom';
-import { useAuth } from '../../shared/model/auth';
+import { useAuth } from '../model/auth';
 
 export function RequireAuth({ children }: { children: JSX.Element }) {
   const { isAdmin } = useAuth();
