@@ -10,6 +10,10 @@ import { Toc } from '../../widgets/Toc/Toc';
 import { NotFoundPage } from '../NotFoundPage/NotFoundPage';
 import styles from './ArticlePage.module.css';
 
+function isHTMLElement(el: unknown): el is HTMLElement {
+  return el instanceof HTMLElement;
+}
+
 export function ArticlePage() {
   const { slug } = useParams();
   const location = useLocation();
@@ -27,20 +31,16 @@ export function ArticlePage() {
   }, []);
 
   const { data: article, isLoading, isError, error } = useArticleQuery(slug ?? '', Boolean(slug));
-
   const { data: toc } = useTocQuery(article?.id);
 
-  const sections = useMemo(() => {
-    if (!toc) {
-      return [] as Section[];
-    }
+  const sections = useMemo<Section[]>(() => {
+    if (!toc) return [];
     return toc.items.flatMap((chapter) => chapter.sections);
   }, [toc]);
 
   useEffect(() => {
-    if (!sections.length) {
-      return;
-    }
+    if (!sections.length) return;
+
     const observer = new IntersectionObserver(
       (entries) => {
         const visible = entries
@@ -55,6 +55,7 @@ export function ArticlePage() {
         const firstAbove = entries
           .filter((entry) => entry.boundingClientRect.top < 0)
           .sort((a, b) => b.boundingClientRect.top - a.boundingClientRect.top);
+
         if (firstAbove.length > 0) {
           setActiveSectionId(firstAbove[0].target.id);
         }
@@ -65,31 +66,34 @@ export function ArticlePage() {
       },
     );
 
-    const observed = sections
+    // собираем элементы разделов безопасно
+    const observed: HTMLElement[] = sections
       .map((section) => {
-        const candidateIds = [section.anchor, section.id];
+        const candidateIds: string[] = [];
         if (section.anchor) {
-          candidateIds.push(`user-content-${section.anchor}`);
+          candidateIds.push(section.anchor, `user-content-${section.anchor}`);
         }
-        return candidateIds
-          .filter(Boolean)
-          .map((candidate) => document.getElementById(candidate as string))
-          .find((el): el is Element => Boolean(el)) ?? null;
-      })
-      .filter((el): el is Element => Boolean(el));
+        candidateIds.push(section.id);
 
-    observed.forEach((element) => observer.observe(element));
+        const el =
+          candidateIds
+            .map((id) => document.getElementById(id))
+            .find((node) => isHTMLElement(node)) ?? null;
+
+        return el;
+      })
+      .filter(isHTMLElement);
+
+    observed.forEach((el) => observer.observe(el));
 
     return () => {
-      observed.forEach((element) => observer.unobserve(element));
+      observed.forEach((el) => observer.unobserve(el));
       observer.disconnect();
     };
   }, [sections]);
 
   useEffect(() => {
-    if (!location.hash || !sections.length) {
-      return;
-    }
+    if (!location.hash || !sections.length) return;
     const anchor = location.hash.slice(1);
     const timeout = window.setTimeout(() => {
       scrollToAnchor(anchor, { smooth: false });
@@ -99,14 +103,10 @@ export function ArticlePage() {
   }, [location.hash, sections]);
 
   useEffect(() => {
-    if (isDesktop) {
-      setIsTocOpen(false);
-    }
+    if (isDesktop) setIsTocOpen(false);
   }, [isDesktop]);
 
-  if (isLoading) {
-    return <PageSpinner />;
-  }
+  if (isLoading) return <PageSpinner />;
 
   if (isError) {
     if (error instanceof ApiError && error.status === 404) {
@@ -119,9 +119,7 @@ export function ArticlePage() {
     );
   }
 
-  if (!article) {
-    return null;
-  }
+  if (!article) return null;
 
   const isTocVisible = isDesktop || isTocOpen;
 
@@ -134,9 +132,7 @@ export function ArticlePage() {
           onNavigate={(anchor) => {
             scrollToAnchor(anchor);
             setActiveSectionId(anchor);
-            if (!isDesktop) {
-              setIsTocOpen(false);
-            }
+            if (!isDesktop) setIsTocOpen(false);
           }}
           isOpen={isTocVisible}
           onClose={!isDesktop ? () => setIsTocOpen(false) : undefined}

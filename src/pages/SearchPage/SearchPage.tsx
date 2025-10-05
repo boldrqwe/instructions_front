@@ -7,6 +7,9 @@ import styles from './SearchPage.module.css';
 
 const PAGE_SIZE = 10;
 
+// вспомогательный тип: debounced функция + cancel
+type DebouncedFn = ((...args: readonly unknown[]) => void) & { cancel: () => void };
+
 export function SearchPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const queryParam = searchParams.get('q') ?? '';
@@ -20,13 +23,14 @@ export function SearchPage() {
     setDebouncedQuery(queryParam);
   }, [queryParam]);
 
-  const debouncedUpdate = useMemo(
-    () =>
-      debounce((value: string) => {
-        setDebouncedQuery(value);
-      }, 300),
-    [],
-  );
+  // ✅ обёртка под тип (...args: readonly unknown[]) => void
+  const debouncedUpdate = useMemo<DebouncedFn>(() => {
+    const fn = (...args: readonly unknown[]) => {
+      const value = String(args[0] ?? '');
+      setDebouncedQuery(value);
+    };
+    return debounce(fn, 300) as DebouncedFn;
+  }, []);
 
   useEffect(() => {
     debouncedUpdate(inputValue);
@@ -38,7 +42,10 @@ export function SearchPage() {
     [debouncedQuery, pageParam],
   );
 
-  const { data, isFetching } = useSearchQuery(searchParamsObject, debouncedQuery.trim().length > 0);
+  const { data, isFetching } = useSearchQuery(
+    searchParamsObject,
+    debouncedQuery.trim().length > 0,
+  );
 
   const totalPages = data ? Math.ceil(data.total / PAGE_SIZE) : 0;
 
@@ -47,6 +54,7 @@ export function SearchPage() {
       <h1 id="search-title" className={styles.title}>
         Поиск по инструкциям
       </h1>
+
       <form className={styles.form} role="search" onSubmit={(event) => event.preventDefault()}>
         <label className={styles.label}>
           <span className="sr-only">Строка поиска</span>
@@ -60,11 +68,8 @@ export function SearchPage() {
               setInputValue(value);
               setSearchParams((prev) => {
                 const params = new URLSearchParams(prev);
-                if (value) {
-                  params.set('q', value);
-                } else {
-                  params.delete('q');
-                }
+                if (value) params.set('q', value);
+                else params.delete('q');
                 params.set('page', '0');
                 return params;
               });
@@ -72,20 +77,24 @@ export function SearchPage() {
           />
         </label>
       </form>
+
       {debouncedQuery.trim().length === 0 ? (
         <p className={styles.state}>Введите запрос, чтобы увидеть результаты.</p>
       ) : (
         <div className={styles.results}>
           {isFetching && <p className={styles.state}>Ищем…</p>}
+
           {data && data.items.length === 0 && !isFetching && (
             <p className={styles.state}>Ничего не найдено. Попробуйте другой запрос.</p>
           )}
+
           <ul className={styles.list}>
             {data?.items.map((item) => {
               const link =
                 item.type === 'section' && item.sectionAnchor
                   ? `/articles/${item.articleSlug}#${item.sectionAnchor}`
                   : `/articles/${item.articleSlug}`;
+
               return (
                 <li key={`${item.type}-${item.id}`} className={styles.card}>
                   <Link to={link} className={styles.link}>
@@ -99,6 +108,7 @@ export function SearchPage() {
               );
             })}
           </ul>
+
           {totalPages > 1 && (
             <nav className={styles.pagination} aria-label="Навигация по страницам">
               <button
@@ -116,9 +126,11 @@ export function SearchPage() {
               >
                 Назад
               </button>
+
               <span className={styles.pageInfo}>
                 Страница {pageParam + 1} из {totalPages}
               </span>
+
               <button
                 type="button"
                 className={styles.pageButton}

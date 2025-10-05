@@ -5,7 +5,9 @@ import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 import { ApiError } from '../../shared/config/api';
 import { MockIntersectionObserver } from '../../setupTests';
 import { ArticlePage } from './ArticlePage';
+import type { UseQueryResult } from '@tanstack/react-query'; // ✅ важно
 
+// Мокаем API-хуки
 vi.mock('../../entities/article/api/queries', () => {
   return {
     useArticleQuery: vi.fn(),
@@ -51,13 +53,15 @@ describe('ArticlePage', () => {
       isLoading: false,
       isError: false,
       error: null,
-    });
+    } as unknown as UseQueryResult<typeof baseArticle, Error>);
+
     vi.mocked(useTocQuery).mockReturnValue({
       data: baseToc,
       isLoading: false,
       isError: false,
       error: null,
-    });
+    } as unknown as UseQueryResult<typeof baseToc, Error>);
+
     vi.mocked(scrollToAnchor).mockClear();
     MockIntersectionObserver.instances.length = 0;
   });
@@ -84,7 +88,9 @@ describe('ArticlePage', () => {
 
     const heading = await screen.findByRole('heading', { level: 2, name: 'Первый шаг' });
     const observer = MockIntersectionObserver.instances.at(-1);
+
     expect(observer).toBeDefined();
+
     await act(async () => {
       observer?.trigger([
         {
@@ -92,9 +98,10 @@ describe('ArticlePage', () => {
           isIntersecting: true,
           intersectionRatio: 0.7,
           boundingClientRect: { top: 0 } as unknown as DOMRectReadOnly,
+          intersectionRect: { top: 0 } as unknown as DOMRectReadOnly, // ✅ добавлено для TS5.8
           rootBounds: null,
           time: Date.now(),
-        } as IntersectionObserverEntry,
+        } as unknown as IntersectionObserverEntry, // ✅ безопасное приведение типов
       ]);
     });
 
@@ -123,7 +130,7 @@ describe('ArticlePage', () => {
       isLoading: false,
       isError: true,
       error: new ApiError({ code: 'NOT_FOUND', message: 'нет', status: 404 }),
-    });
+    } as unknown as UseQueryResult<typeof baseArticle, Error>);
 
     render(
       <MemoryRouter initialEntries={['/articles/unknown']}>
