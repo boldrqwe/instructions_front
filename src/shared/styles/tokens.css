@@ -1,0 +1,23 @@
+:root {
+  --bg: #f7f8fa;
+  --bg-elev: #ffffff;
+  --text: #1f2a37;
+  --muted: #5f6b7a;
+  --primary: #635bff;
+  --link: #2563eb;
+  --border: #d0d7e2;
+  --font-sans: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+  --font-mono: 'Fira Code', 'SFMono-Regular', ui-monospace, monospace;
+  --shadow: 0 12px 30px rgba(99, 91, 255, 0.15);
+}
+
+[data-theme='dark'] {
+  --bg: #0f172a;
+  --bg-elev: #1e293b;
+  --text: #f8fafc;
+  --muted: #94a3b8;
+  --primary: #818cf8;
+  --link: #60a5fa;
+  --border: #334155;
+  --shadow: 0 12px 30px rgba(129, 140, 248, 0.25);
+}

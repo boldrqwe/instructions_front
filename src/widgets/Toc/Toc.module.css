@@ -1,0 +1,115 @@
+.root {
+  width: 280px;
+  flex-shrink: 0;
+  background: var(--bg-elev);
+  border-right: 1px solid var(--border);
+  padding: 1.5rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  max-height: calc(100vh - 120px);
+  position: sticky;
+  top: 96px;
+  overflow-y: auto;
+  transition: transform 0.3s ease;
+}
+
+.open {
+  transform: translateX(0);
+}
+
+.closed {
+  transform: translateX(-110%);
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.title {
+  font-size: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+}
+
+.close {
+  display: none;
+  background: none;
+  border: none;
+  color: var(--muted);
+  cursor: pointer;
+}
+
+.nav {
+  flex: 1;
+}
+
+.list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 1rem;
+}
+
+.chapterTitle {
+  font-weight: 600;
+  color: var(--text);
+  display: block;
+  margin-bottom: 0.5rem;
+}
+
+.sectionList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.25rem;
+}
+
+.section {
+  width: 100%;
+  text-align: left;
+  background: transparent;
+  border: none;
+  color: var(--muted);
+  font-size: 0.95rem;
+  padding: 0.35rem 0.5rem;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.section:hover,
+.section:focus-visible {
+  background: rgba(99, 91, 255, 0.08);
+  color: var(--primary);
+}
+
+.active {
+  background: rgba(99, 91, 255, 0.12);
+  color: var(--primary);
+  font-weight: 600;
+}
+
+@media (max-width: 1024px) {
+  .root {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    max-height: none;
+    z-index: 20;
+    box-shadow: 0 24px 48px rgba(15, 23, 42, 0.2);
+  }
+
+  .close {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    font-weight: 600;
+  }
+}

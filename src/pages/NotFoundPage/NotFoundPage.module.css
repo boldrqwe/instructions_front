@@ -1,0 +1,33 @@
+.root {
+  padding: 4rem 0;
+  display: grid;
+  gap: 1.5rem;
+  text-align: center;
+}
+
+.title {
+  font-size: 2rem;
+  font-weight: 700;
+}
+
+.text {
+  max-width: 540px;
+  margin: 0 auto;
+  color: var(--muted);
+}
+
+.link {
+  justify-self: center;
+  padding: 0.75rem 1.5rem;
+  border-radius: 9999px;
+  border: none;
+  background: var(--primary);
+  color: #fff;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.link:hover,
+.link:focus-visible {
+  opacity: 0.9;
+}

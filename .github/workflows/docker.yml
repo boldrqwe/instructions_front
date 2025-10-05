@@ -9,6 +9,10 @@ permissions:
   contents: read
   packages: write
 
+env:
+  IMAGE: ghcr.io/boldrqwe/instructions_front
+  VITE_API_BASE_URL: https://site.79.174.84.176.sslip.io/api/v1
+
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
@@ -37,5 +41,7 @@ jobs:
         with:
           context: .
           push: true
+          build-args: |
+            VITE_API_BASE_URL=${{ env.VITE_API_BASE_URL }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
