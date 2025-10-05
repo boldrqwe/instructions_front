@@ -28,10 +28,19 @@ export function useTocQuery(articleId: string | undefined) {
 }
 
 export function useSearchQuery(params: SearchParams, enabled = true) {
-  return useQuery<Page<SearchResult>>({
-    queryKey: ['search', params] as const,
-    queryFn: () => search(params),
+  return useQuery({
+    queryKey: ['search', params],
+    queryFn: async () => {
+      const res = await search(params);
+      // 🔽 Нормализуем структуру под фронт
+      return {
+        items: res.content ?? [],
+        page: res.page ?? 0,
+        size: res.size ?? 20,
+        total: res.totalElements ?? 0,
+      };
+    },
     enabled: params.query.trim().length > 0 && enabled,
-    placeholderData: (prev) => prev,
   });
 }
+
