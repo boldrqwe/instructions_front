@@ -53,9 +53,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   async function login(username: string, password: string): Promise<boolean> {
     try {
+      const tokenPayload = `${username}:${password}`;
+      const encodedToken = window.btoa(
+        String.fromCharCode(...new TextEncoder().encode(tokenPayload)),
+      );
+
       const data = await apiClient<AuthLoginResponse>('/auth/login', {
         method: 'POST',
-        body: JSON.stringify({ username, password }),
+        headers: {
+          Authorization: `Basic ${encodedToken}`,
+        },
+        body: JSON.stringify({ username, login: username, password }),
       });
 
       if (!data?.token) {
