@@ -1,4 +1,5 @@
 import { useState, type FormEvent } from 'react';
+import { useAuth } from '../../shared/model/auth';
 
 export type ArticleFormMode = 'create' | 'edit';
 
@@ -10,6 +11,7 @@ export function ArticleForm({ mode }: ArticleFormProps) {
   const [title, setTitle] = useState('');
   const [slug, setSlug] = useState('');
   const [body, setBody] = useState('');
+  const { authHeader } = useAuth();
 
   const baseUrl = import.meta.env.VITE_API_BASE_URL?.replace(/\/$/, '') || '';
 
@@ -19,7 +21,10 @@ export function ArticleForm({ mode }: ArticleFormProps) {
 
     const res = await fetch(`${baseUrl}/articles`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        ...(authHeader ? { Authorization: authHeader } : {}),
+      },
       body: JSON.stringify(payload),
     });
 
