@@ -1,53 +1,71 @@
-import { createContext, useContext, useMemo, useState } from 'react';
+import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
 
-type AuthState = { token: string | null; isAdmin: boolean };
-type Ctx = AuthState & {
-  login: (u: string, p: string) => Promise<boolean>;
+interface AuthContextType {
+  user: { name: string; roles: string[] } | null;
+  isAdmin: boolean;
+  login: (username: string, password: string) => Promise<boolean>;
   logout: () => void;
-};
+}
 
-const AuthContext = createContext<Ctx | null>(null);
+const AuthContext = createContext<AuthContextType>({
+  user: null,
+  isAdmin: false,
+  login: async () => false,
+  logout: () => {},
+});
 
-export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [token, setToken] = useState<string | null>(() => localStorage.getItem('token'));
-  const [isAdmin, setIsAdmin] = useState<boolean>(() => localStorage.getItem('isAdmin') === '1');
+export function AuthProvider({ children }: { children: ReactNode }) {
+  const [user, setUser] = useState<{ name: string; roles: string[] } | null>(null);
 
-  async function login(username: string, password: string) {
-    const base = import.meta.env.VITE_API_BASE_URL?.replace(/\/$/, '') || '';
-    try {
-      const res = await fetch(`${base}/auth/login`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, password }),
-      });
-      if (res.ok) {
-        const data = await res.json().catch(() => ({} as any));
-        const tok = data.token || data.accessToken || 'token';
-        setToken(tok);  localStorage.setItem('token', tok);
-        setIsAdmin(true); localStorage.setItem('isAdmin', '1');
-        return true;
-      }
-    } catch {}
-    // dev-режим без бэка (включается при VITE_ENABLE_FAKE_LOGIN=true)
-    if (import.meta.env.VITE_ENABLE_FAKE_LOGIN === 'true') {
-      setToken('dev'); localStorage.setItem('token', 'dev');
-      setIsAdmin(true); localStorage.setItem('isAdmin', '1');
-      return true;
-    }
-    return false;
+  // 🟢 Автовосстановление авторизации
+  useEffect(() => {
+    const savedHeader = localStorage.getItem('authHeader');
+    if (!savedHeader) return;
+
+    fetch('/api/v1/auth/me', {
+      headers: { Authorization: savedHeader },
+    })
+      .then(res => (res.ok ? res.json() : null))
+      .then(data => {
+        if (data?.authenticated) {
+          setUser({ name: data.name, roles: data.roles });
+        } else {
+          localStorage.removeItem('authHeader');
+        }
+      })
+      .catch(() => localStorage.removeItem('authHeader'));
+  }, []);
+
+  async function login(username: string, password: string): Promise<boolean> {
+    const authHeader = 'Basic ' + btoa(`${username}:${password}`);
+    const res = await fetch('/api/v1/auth/me', {
+      headers: { Authorization: authHeader },
+    });
+
+    if (!res.ok) return false;
+    const data = await res.json();
+
+    if (!data.authenticated) return false;
+
+    localStorage.setItem('authHeader', authHeader);
+    setUser({ name: data.name, roles: data.roles });
+    return true;
   }
 
   function logout() {
-    setToken(null); setIsAdmin(false);
-    localStorage.removeItem('token'); localStorage.removeItem('isAdmin');
+    localStorage.removeItem('authHeader');
+    setUser(null);
   }
 
-  const value = useMemo(() => ({ token, isAdmin, login, logout }), [token, isAdmin]);
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+  const isAdmin = !!user?.roles?.includes('ROLE_ADMIN');
+
+  return (
+    <AuthContext.Provider value={{ user, isAdmin, login, logout }}>
+      {children}
+    </AuthContext.Provider>
+  );
 }
 
 export function useAuth() {
-  const ctx = useContext(AuthContext);
-  if (!ctx) throw new Error('useAuth must be used within <AuthProvider>');
-  return ctx;
+  return useContext(AuthContext);
 }
