@@ -10,8 +10,8 @@ export interface SearchResult {
 }
 
 export interface Page<T> {
-  content: T[];           // ← исправлено под реальный JSON
+  items: T[];
+  total: number;
   page: number;
   size: number;
-  totalElements: number;
 }

@@ -51,8 +51,11 @@ export interface SearchResult {
 }
 
 export interface Page<TItem> {
-  readonly items: TItem[];
-  readonly total: number;
+  /** Новый формат от API (Spring Data) */
+  readonly content?: TItem[];
+  readonly totalElements?: number;
+  readonly total?: number;
   readonly page: number;
   readonly size: number;
 }
+
