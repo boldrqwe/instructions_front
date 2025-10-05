@@ -1,38 +1,36 @@
-import { useEffect, useRef, type ReactNode } from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import { SearchBar } from '../../../widgets/SearchBar/SearchBar';
+import { NavLink, Link } from 'react-router-dom';
 import styles from './Layout.module.css';
 
-interface LayoutProps {
-  readonly children: ReactNode;
-}
+type Props = { children: React.ReactNode };
 
-export function Layout({ children }: LayoutProps) {
-  const location = useLocation();
-  const mainRef = useRef<HTMLElement>(null);
-
-  useEffect(() => {
-    mainRef.current?.focus();
-    window.scrollTo({ top: 0 });
-  }, [location]);
-
+export function Layout({ children }: Props) {
   return (
     <div className={styles.root}>
       <header className={styles.header}>
-        <Link className={styles.logo} to="/">
-          Длинные инструкции
-        </Link>
-        <SearchBar />
+        <Link to="/" className={styles.logo}>Instructions</Link>
+
+        <nav className={styles.nav}>
+          <NavLink to="/" end className={({ isActive }) => isActive ? styles.active : undefined}>
+            Главная
+          </NavLink>
+
+          <NavLink to="/search" className={({ isActive }) => isActive ? styles.active : undefined}>
+            Поиск
+          </NavLink>
+
+          {/* CTA — ссылка на создание статьи */}
+          <NavLink
+            to="/admin/articles/new"
+            className={({ isActive }) =>
+              [styles.cta, isActive ? styles.active : ''].join(' ')
+            }
+          >
+            Создать статью
+          </NavLink>
+        </nav>
       </header>
-      <main
-        ref={mainRef}
-        id="main-content"
-        className={styles.main}
-        tabIndex={-1}
-        aria-live="polite"
-      >
-        {children}
-      </main>
+
+      <main className={styles.content}>{children}</main>
     </div>
   );
 }

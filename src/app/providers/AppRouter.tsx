@@ -23,6 +23,12 @@ const NotFoundPage = lazy(async () => {
   return { default: module.NotFoundPage };
 });
 
+// ⚠️ Добавили ленивую загрузку формы создания статьи
+const ArticleForm = lazy(async () => {
+  const module = await import('../../pages/ArticleForm/ArticleForm');
+  return { default: module.ArticleForm };
+});
+
 export function AppRouter() {
   return (
     <BrowserRouter>
@@ -30,8 +36,9 @@ export function AppRouter() {
         <Suspense fallback={<PageSpinner />}>
           <Routes>
             <Route path="/" element={<HomePage />} />
-            <Route path="/articles/:slug" element={<ArticlePage />} />
             <Route path="/search" element={<SearchPage />} />
+            <Route path="/articles/:slug" element={<ArticlePage />} />
+            <Route path="/admin/articles/new" element={<ArticleForm mode="create" />} />
             <Route path="*" element={<NotFoundPage />} />
           </Routes>
         </Suspense>
