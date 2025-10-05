@@ -1,36 +1,25 @@
-import { NavLink, Link } from 'react-router-dom';
-import styles from './Layout.module.css';
+import { NavLink } from 'react-router-dom';
+import { useAuth } from '../../model/auth'; // путь подкорректируй
 
-type Props = { children: React.ReactNode };
-
-export function Layout({ children }: Props) {
+export function Layout({ children }: { children: React.ReactNode }) {
+  const { isAdmin, logout } = useAuth();
   return (
-    <div className={styles.root}>
-      <header className={styles.header}>
-        <Link to="/" className={styles.logo}>Instructions</Link>
-
-        <nav className={styles.nav}>
-          <NavLink to="/" end className={({ isActive }) => isActive ? styles.active : undefined}>
-            Главная
-          </NavLink>
-
-          <NavLink to="/search" className={({ isActive }) => isActive ? styles.active : undefined}>
-            Поиск
-          </NavLink>
-
-          {/* CTA — ссылка на создание статьи */}
-          <NavLink
-            to="/admin/articles/new"
-            className={({ isActive }) =>
-              [styles.cta, isActive ? styles.active : ''].join(' ')
-            }
-          >
-            Создать статью
-          </NavLink>
+    <>
+      <header>
+        <nav>
+          <NavLink to="/" end>Главная</NavLink>
+          <NavLink to="/search">Поиск</NavLink>
+          {isAdmin ? (
+            <>
+              <NavLink to="/admin/articles/new">Создать статью</NavLink>
+              <button onClick={logout}>Выйти</button>
+            </>
+          ) : (
+            <NavLink to="/admin/login">Войти</NavLink>
+          )}
         </nav>
       </header>
-
-      <main className={styles.content}>{children}</main>
-    </div>
+      <main>{children}</main>
+    </>
   );
 }
