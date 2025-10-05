@@ -14,7 +14,7 @@ concurrency:
 
 env:
   IMAGE: ghcr.io/boldrqwe/instructions_front
-  VITE_API_BASE_URL: https://test.79.174.84.176.sslip.io
+  VITE_API_BASE_URL: https://site.79.174.84.176.sslip.io/api/v1
 
 jobs:
   build-push:
