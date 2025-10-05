@@ -29,12 +29,19 @@ export function HomePage() {
   }
 
   // --- Проверка структуры данных ---
-  if (!data || !Array.isArray(data.items)) {
-    console.error('[HomePage] data.items отсутствует или не массив:', data);
+  if (!data || !Array.isArray(data.content)) {
+    console.error('[HomePage] data.content отсутствует или не массив:', data);
     return (
       <p className={styles.state} role="alert">
-        ⚠️ Ошибка данных: поле <code>items</code> отсутствует или некорректно.
+        ⚠️ Ошибка данных: поле <code>content</code> отсутствует или некорректно.
       </p>
+    );
+  }
+
+  // --- Если статей нет ---
+  if (data.content.length === 0) {
+    return (
+      <p className={styles.state}>Пока нет опубликованных статей.</p>
     );
   }
 
@@ -51,7 +58,7 @@ export function HomePage() {
       </header>
 
       <ul className={styles.list}>
-        {data.items.map((article) => (
+        {data.content.map((article) => (
           <li key={article.id ?? article.slug ?? Math.random()} className={styles.card}>
             <Link to={`/articles/${article.slug}`} className={styles.link}>
               <h2 className={styles.cardTitle}>{article.title}</h2>
