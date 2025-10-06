@@ -38,7 +38,10 @@ function normalizeError(status: number, body: unknown): ApiError {
 }
 
 export function createApiClient(fetchFn: FetchFn, options?: CreateApiClientOptions) {
-  const baseUrl = options?.baseUrl ?? import.meta.env.VITE_API_BASE_URL ?? '';
+  const baseUrl =
+      options?.baseUrl ??
+      import.meta.env.VITE_API_BASE_URL?.replace(/\/$/, '') ??
+      'http://localhost:8080/api/v1';
   const baseTimeout = options?.timeout ?? DEFAULT_TIMEOUT;
 
   return async function request<TResponse>(

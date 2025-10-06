@@ -1,11 +1,9 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 import type { ReactNode } from 'react';
 
-import { apiClient } from '../config/api';
-
 type AuthState =
-  | { schema: 'bearer'; token: string }
-  | { schema: 'basic'; credentials: string };
+    | { schema: 'bearer'; token: string }
+    | { schema: 'basic'; credentials: string };
 
 interface AuthContextType {
   authHeader: string | null;
@@ -19,56 +17,66 @@ const AuthContext = createContext<AuthContextType>(null!);
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [authState, setAuthState] = useState<AuthState | null>(() => {
     const stored = localStorage.getItem('token');
-    if (!stored) {
-      return null;
-    }
+    if (!stored) return null;
 
     try {
-      const parsed = JSON.parse(stored) as { schema?: string; token?: string; credentials?: string };
+      const parsed = JSON.parse(stored) as {
+        schema?: string;
+        token?: string;
+        credentials?: string;
+      };
+
       if (parsed?.schema === 'basic' && typeof parsed.credentials === 'string') {
-        return { schema: 'basic', credentials: parsed.credentials } satisfies AuthState;
+        return { schema: 'basic', credentials: parsed.credentials };
       }
       if (parsed?.schema === 'bearer' && typeof parsed.token === 'string') {
-        return { schema: 'bearer', token: parsed.token } satisfies AuthState;
+        return { schema: 'bearer', token: parsed.token };
       }
     } catch {
-      if (stored) {
-        return { schema: 'bearer', token: stored } satisfies AuthState;
-      }
+      // старый формат — просто токен
+      return { schema: 'bearer', token: stored };
     }
 
     return null;
   });
+
   const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
-    if (!authState) {
-      return;
-    }
-
+    if (!authState) return;
     let isCancelled = false;
 
     async function loadProfile(state: AuthState) {
       try {
         const authorizationHeader =
-          state.schema === 'bearer'
-            ? `Bearer ${state.token}`
-            : `Basic ${state.credentials}`;
-        const data = await apiClient<AuthProfileResponse>('/auth/me', {
+            state.schema === 'bearer'
+                ? `Bearer ${state.token}`
+                : `Basic ${state.credentials}`;
+
+        const baseUrl =
+            import.meta.env.VITE_API_BASE_URL?.replace(/\/$/, '') ??
+            'http://localhost:8080/api/v1';
+
+        // ✅ вызываем /auth/profile, если есть
+        const response = await fetch(`${baseUrl}/auth/profile`, {
           headers: { Authorization: authorizationHeader },
         });
 
-        if (isCancelled) {
-          return;
+        if (!response.ok) {
+          console.warn('[Auth] Profile check failed:', response.status);
+          throw new Error(`Profile request failed: ${response.status}`);
         }
 
-        const hasAdminRole = Boolean(data.authenticated && data.roles?.includes('ROLE_ADMIN'));
+        const data = (await response.json()) as AuthProfileResponse;
+        if (isCancelled) return;
+
+        const hasAdminRole = Boolean(
+            data.authenticated && data.roles?.includes('ROLE_ADMIN')
+        );
         setIsAdmin(hasAdminRole);
-      } catch {
-        if (isCancelled) {
-          return;
-        }
-
+      } catch (err) {
+        if (isCancelled) return;
+        console.error('[Auth] loadProfile error:', err);
         setIsAdmin(false);
         setAuthState(null);
         localStorage.removeItem('token');
@@ -76,7 +84,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
 
     loadProfile(authState);
-
     return () => {
       isCancelled = true;
     };
@@ -85,11 +92,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   async function login(username: string, password: string): Promise<boolean> {
     try {
       const tokenPayload = `${username}:${password}`;
-      const encodedToken = window.btoa(
-        String.fromCharCode(...new TextEncoder().encode(tokenPayload)),
-      );
+      const encodedToken = window.btoa(tokenPayload);
 
-      const baseUrl = import.meta.env.VITE_API_BASE_URL?.replace(/\/$/, '') ?? '';
+      const baseUrl =
+          import.meta.env.VITE_API_BASE_URL?.replace(/\/$/, '') ??
+          'http://localhost:8080/api/v1';
+
       const response = await fetch(`${baseUrl}/auth/login`, {
         method: 'POST',
         headers: {
@@ -99,28 +107,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       });
 
       if (!response.ok) {
+        console.warn('[Auth] login failed:', response.status);
         return false;
       }
 
-      let data: AuthLoginResponse | null = null;
       const contentType = response.headers.get('content-type') ?? '';
+      let data: AuthLoginResponse | null = null;
       if (contentType.includes('application/json')) {
-        data = await response
-          .json()
-          .then((payload) => (payload && typeof payload === 'object' ? payload : null))
-          .catch(() => null);
+        data = await response.json().catch(() => null);
       }
 
       const nextState: AuthState =
-        data && typeof data.token === 'string'
-          ? { schema: 'bearer', token: data.token }
-          : { schema: 'basic', credentials: encodedToken };
+          data && typeof data.token === 'string'
+              ? { schema: 'bearer', token: data.token }
+              : { schema: 'basic', credentials: encodedToken };
 
       localStorage.setItem('token', JSON.stringify(nextState));
       setAuthState(nextState);
+      setIsAdmin(true); // ✅ сразу считаем админом, потом loadProfile уточнит
 
       return true;
-    } catch {
+    } catch (err) {
+      console.error('[Auth] login error:', err);
       return false;
     }
   }
@@ -132,13 +140,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   const authHeader = authState
-    ? authState.schema === 'bearer'
-      ? `Bearer ${authState.token}`
-      : `Basic ${authState.credentials}`
-    : null;
+      ? authState.schema === 'bearer'
+          ? `Bearer ${authState.token}`
+          : `Basic ${authState.credentials}`
+      : null;
 
   return (
-    <AuthContext.Provider value={{ authHeader, isAdmin, login, logout }}>{children}</AuthContext.Provider>
+      <AuthContext.Provider value={{ authHeader, isAdmin, login, logout }}>
+        {children}
+      </AuthContext.Provider>
   );
 }
 
