@@ -67,3 +67,55 @@ Object.defineProperty(HTMLElement.prototype, 'scrollIntoView', {
 });
 
 window.scrollTo = vi.fn();
+
+const rect = {
+  bottom: 0,
+  top: 0,
+  left: 0,
+  right: 0,
+  height: 0,
+  width: 0,
+  x: 0,
+  y: 0,
+  toJSON: () => {},
+};
+
+Object.defineProperty(HTMLElement.prototype, 'getClientRects', {
+  writable: true,
+  value: () => [rect],
+});
+
+if (typeof Element !== 'undefined') {
+  Object.defineProperty(Element.prototype, 'getClientRects', {
+    writable: true,
+    value: () => [rect],
+  });
+
+  Object.defineProperty(Element.prototype, 'getBoundingClientRect', {
+    writable: true,
+    value: () => rect,
+  });
+}
+
+if (typeof Range !== 'undefined') {
+  Object.defineProperty(Range.prototype, 'getBoundingClientRect', {
+    writable: true,
+    value: () => rect,
+  });
+  Object.defineProperty(Range.prototype, 'getClientRects', {
+    writable: true,
+    value: () => [rect],
+  });
+}
+
+if (!URL.createObjectURL) {
+  URL.createObjectURL = vi.fn(() => 'blob:mock');
+}
+
+if (!URL.revokeObjectURL) {
+  URL.revokeObjectURL = vi.fn();
+}
+
+if (typeof document.elementFromPoint !== 'function') {
+  document.elementFromPoint = () => document.body;
+}

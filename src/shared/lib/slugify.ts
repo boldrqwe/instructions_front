@@ -1,9 +1,12 @@
-export function slugify(value: string) {
-  return value
+const NON_WORD_RE = /[^\p{Letter}\p{Number}]+/gu;
+const TRIM_DASH_RE = /^-+|-+$/g;
+
+export function slugify(input: string): string {
+  if (!input) return '';
+  return input
+    .normalize('NFKD')
     .toLowerCase()
-    .trim()
-    .replace(/[^\p{L}\d\s-]+/gu, '')
-    .replace(/\s+/g, '-')
-    .replace(/-+/g, '-')
-    .replace(/^-|-$/g, '');
+    .replace(NON_WORD_RE, '-')
+    .replace(TRIM_DASH_RE, '')
+    .slice(0, 96);
 }
