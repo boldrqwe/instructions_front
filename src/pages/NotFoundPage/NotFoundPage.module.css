@@ -1,33 +1,39 @@
 .root {
-  padding: 4rem 0;
+  padding: 5rem 0;
   display: grid;
-  gap: 1.5rem;
+  gap: 1.75rem;
   text-align: center;
 }
 
 .title {
-  font-size: 2rem;
+  font-size: clamp(2rem, 4vw, 2.6rem);
   font-weight: 700;
+  letter-spacing: -0.01em;
 }
 
 .text {
-  max-width: 540px;
+  max-width: 560px;
   margin: 0 auto;
   color: var(--muted);
+  font-size: 1.05rem;
 }
 
 .link {
   justify-self: center;
-  padding: 0.75rem 1.5rem;
+  padding: 0.85rem 1.85rem;
   border-radius: 9999px;
   border: none;
-  background: var(--primary);
+  background: linear-gradient(135deg, var(--primary), var(--primary-strong));
   color: #fff;
   text-decoration: none;
   font-weight: 600;
+  letter-spacing: 0.02em;
+  box-shadow: 0 22px 38px -26px rgba(47, 92, 255, 0.85);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .link:hover,
 .link:focus-visible {
-  opacity: 0.9;
+  transform: translateY(-1px);
+  box-shadow: 0 30px 48px -28px rgba(47, 92, 255, 0.9);
 }
