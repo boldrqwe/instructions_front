@@ -1,0 +1,25 @@
+.card {
+  background: var(--bg-elev);
+  border-radius: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.45);
+  box-shadow: var(--shadow-card);
+  padding: 1.25rem 1.5rem;
+  backdrop-filter: var(--glass-blur);
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.title {
+  font: 700 1.1rem/1.2 var(--font-sans);
+  color: var(--text);
+}
+
+.meta {
+  font: 0.85rem/1.4 var(--font-sans);
+  color: var(--muted);
+}
