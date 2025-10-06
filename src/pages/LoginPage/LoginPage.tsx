@@ -1,10 +1,12 @@
 import { useState, type FormEvent } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../shared/model/auth';
+import styles from './LoginPage.module.css';
 
 export function LoginPage() {
   const { login } = useAuth();
-  const [u, setU] = useState(''); const [p, setP] = useState('');
+  const [u, setU] = useState('');
+  const [p, setP] = useState('');
   const [err, setErr] = useState('');
   const nav = useNavigate();
   const loc = useLocation();
@@ -18,14 +20,45 @@ export function LoginPage() {
   }
 
   return (
-    <div style={{ maxWidth: 420, margin: '24px auto' }}>
-      <h1>Войти</h1>
-      <form onSubmit={onSubmit}>
-        <input placeholder="Логин" value={u} onChange={e=>setU(e.target.value)} required style={{width:'100%',marginBottom:12}}/>
-        <input placeholder="Пароль" type="password" value={p} onChange={e=>setP(e.target.value)} required style={{width:'100%',marginBottom:12}}/>
-        {err && <div style={{color:'red', marginBottom:12}}>{err}</div>}
-        <button type="submit">Войти</button>
-      </form>
-    </div>
+    <section className={styles.root}>
+      <div className={styles.card}>
+        <h1 className={styles.title}>Войти</h1>
+        <form className={styles.form} onSubmit={onSubmit}>
+          <label className={styles.field} htmlFor="login-username">
+            <span className={styles.label}>Логин</span>
+            <input
+              id="login-username"
+              className={styles.input}
+              placeholder="admin"
+              value={u}
+              onChange={(e) => setU(e.target.value)}
+              required
+              autoComplete="username"
+            />
+          </label>
+          <label className={styles.field} htmlFor="login-password">
+            <span className={styles.label}>Пароль</span>
+            <input
+              id="login-password"
+              className={styles.input}
+              placeholder="••••••••"
+              type="password"
+              value={p}
+              onChange={(e) => setP(e.target.value)}
+              required
+              autoComplete="current-password"
+            />
+          </label>
+          {err && (
+            <div className={styles.error} role="alert">
+              {err}
+            </div>
+          )}
+          <button type="submit" className={styles.submit}>
+            Войти
+          </button>
+        </form>
+      </div>
+    </section>
   );
 }
