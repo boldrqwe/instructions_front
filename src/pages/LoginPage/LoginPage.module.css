@@ -1,21 +1,28 @@
+
 .root {
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 4rem 1.5rem;
-  min-height: min(80vh, 680px);
+  padding: clamp(4rem, 5vw, 5.5rem) 1.5rem;
+  min-height: min(80vh, 720px);
 }
 
 .card {
   width: min(420px, 100%);
-  background: var(--bg-elev);
-  border-radius: 1rem;
-  padding: 2.5rem 2.25rem;
-  box-shadow: 0 30px 60px -40px rgba(99, 91, 255, 0.45);
+  background: rgba(255, 255, 255, 0.82);
+  border-radius: 1.35rem;
+  padding: clamp(2.25rem, 4vw, 2.8rem) clamp(2rem, 4vw, 2.4rem);
+  box-shadow: 0 35px 70px -45px rgba(31, 73, 182, 0.55);
   border: 1px solid rgba(255, 255, 255, 0.6);
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
+  backdrop-filter: var(--glass-blur);
+}
+
+[data-theme='dark'] .card {
+  background: rgba(13, 25, 52, 0.9);
+  border-color: rgba(107, 139, 255, 0.35);
 }
 
 .title {
