@@ -13,7 +13,9 @@ export function ArticleForm({ mode }: ArticleFormProps) {
   const [body, setBody] = useState('');
   const { authHeader } = useAuth();
 
-  const baseUrl = import.meta.env.VITE_API_BASE_URL?.replace(/\/$/, '') || '';
+  const baseUrl =
+      import.meta.env.VITE_API_BASE_URL?.replace(/\/$/, '') ??
+      'http://localhost:8080/api/v1';
 
   async function onSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
