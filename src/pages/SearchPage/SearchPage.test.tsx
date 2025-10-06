@@ -4,11 +4,11 @@ import { beforeEach, describe, expect, test, vi } from 'vitest';
 import { SearchPage } from './SearchPage';
 import type { Page, SearchResult } from '../../entities/search/model/types';
 
-vi.mock('../../entities/search/api/queries', () => ({
+vi.mock('../../entities/article/api/queries', () => ({
   useSearchQuery: vi.fn(),
 }));
 
-const { useSearchQuery } = await import('../../entities/search/api/queries');
+const { useSearchQuery } = await import('../../entities/article/api/queries');
 
 describe('SearchPage', () => {
   beforeEach(() => {
@@ -64,7 +64,7 @@ describe('SearchPage', () => {
     } as any);
 
     render(
-      <MemoryRouter>
+      <MemoryRouter initialEntries={['/search?q=паста']}>
         <SearchPage />
       </MemoryRouter>,
     );
@@ -84,7 +84,7 @@ describe('SearchPage', () => {
     } as any);
 
     render(
-      <MemoryRouter>
+      <MemoryRouter initialEntries={['/search?q=паста']}>
         <SearchPage />
       </MemoryRouter>,
     );
@@ -103,7 +103,7 @@ describe('SearchPage', () => {
     } as any);
 
     render(
-      <MemoryRouter>
+      <MemoryRouter initialEntries={['/search?q=паста']}>
         <SearchPage />
       </MemoryRouter>,
     );

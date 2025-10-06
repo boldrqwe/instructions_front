@@ -17,6 +17,10 @@ export interface Article {
   readonly status: ArticleStatus;
   readonly updatedAt: string;
   readonly body: string;
+  readonly contentHtml?: string;
+  readonly contentJson?: unknown;
+  readonly summary?: string | null;
+  readonly coverImageUrl?: string | null;
 }
 
 export interface Section {

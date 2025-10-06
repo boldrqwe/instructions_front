@@ -123,6 +123,8 @@ export function ArticlePage() {
 
   const isTocVisible = isDesktop || isTocOpen;
 
+  const summary = article.summary ?? article.description;
+
   return (
     <article className={styles.layout}>
       {toc && (
@@ -150,14 +152,23 @@ export function ArticlePage() {
         )}
         <header className={styles.header}>
           <h1 className={styles.title}>{article.title}</h1>
-          <p className={styles.description}>{article.description}</p>
+          <p className={styles.description}>{summary}</p>
           <span className={styles.meta}>
             Обновлено {new Date(article.updatedAt).toLocaleDateString('ru-RU')}
           </span>
         </header>
-        <div className={styles.markdown}>
-          <MarkdownView content={article.body} />
-        </div>
+        {article.coverImageUrl ? (
+          <div className={styles.cover}>
+            <img src={article.coverImageUrl} alt="Обложка статьи" />
+          </div>
+        ) : null}
+        {article.contentHtml ? (
+          <div className={styles.html} dangerouslySetInnerHTML={{ __html: article.contentHtml }} />
+        ) : (
+          <div className={styles.markdown}>
+            <MarkdownView content={article.body} />
+          </div>
+        )}
       </div>
     </article>
   );

@@ -28,6 +28,14 @@ export function Layout({ children }: { children: React.ReactNode }) {
           {isAdmin ? (
             <div className={styles.actions}>
               <NavLink
+                to="/admin/articles/drafts"
+                className={({ isActive }) =>
+                  isActive ? `${styles.link} ${styles.linkActive}` : styles.link
+                }
+              >
+                Черновики
+              </NavLink>
+              <NavLink
                 to="/admin/articles/new"
                 className={({ isActive }) =>
                   isActive ? `${styles.link} ${styles.linkActive}` : styles.link
