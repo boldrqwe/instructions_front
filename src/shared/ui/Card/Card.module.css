@@ -1,0 +1,7 @@
+.card {
+  background-color: var(--surface-elevated, #ffffff);
+  border: 1px solid rgba(27, 31, 36, 0.08);
+  border-radius: 12px;
+  padding: 1.25rem;
+  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.05);
+}

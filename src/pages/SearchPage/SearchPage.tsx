@@ -42,7 +42,7 @@ export function SearchPage() {
     [debouncedQuery, pageParam],
   );
 
-  const { data, isFetching } = useSearchQuery(
+  const { data, isFetching, isError, error } = useSearchQuery(
     searchParamsObject,
     debouncedQuery.trim().length > 0,
   );
@@ -84,7 +84,13 @@ export function SearchPage() {
         <div className={styles.results}>
           {isFetching && <p className={styles.state}>Ищем…</p>}
 
-          {data && data.items.length === 0 && !isFetching && (
+          {isError && !isFetching && (
+            <p className={styles.state} role="alert">
+              Ошибка: {error instanceof Error ? error.message : 'не удалось выполнить поиск'}
+            </p>
+          )}
+
+          {data && data.items.length === 0 && !isFetching && !isError && (
             <p className={styles.state}>Ничего не найдено. Попробуйте другой запрос.</p>
           )}
 
