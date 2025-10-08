@@ -35,7 +35,7 @@ export async function listArticles(params: ListArticlesParams = {}) {
 }
 
 export function getArticleBySlug(slug: string) {
-  return apiClient<Article>(`/articles/${slug}`);
+  return apiClient<Article>(`/articles/by-slug/${slug}`);
 }
 
 export function getToc(articleId: string) {

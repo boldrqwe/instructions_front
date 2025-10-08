@@ -4,7 +4,7 @@ export interface SearchResult {
   title: string;
   snippet: string;
   articleId: string;
-  articleSlug: string;
+  slug: string;            // 👈 вместо Slug (с маленькой буквы)
   sectionId?: string;
   sectionAnchor?: string;
 }

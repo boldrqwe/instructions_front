@@ -45,7 +45,7 @@ export interface SearchResult {
   readonly title: string;
   readonly snippet: string;
   readonly articleId: string;
-  readonly articleSlug: string;
+  readonly slug: string;
   readonly sectionId?: string;
   readonly sectionAnchor?: string;
 }

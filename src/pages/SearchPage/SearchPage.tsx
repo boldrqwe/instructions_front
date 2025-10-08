@@ -92,8 +92,8 @@ export function SearchPage() {
             {data?.items.map((item) => {
               const link =
                 item.type === 'section' && item.sectionAnchor
-                  ? `/articles/${item.articleSlug}#${item.sectionAnchor}`
-                  : `/articles/${item.articleSlug}`;
+                  ? `/articles/${item.slug}#${item.sectionAnchor}`
+                  : `/articles/${item.slug}`;
 
               return (
                 <li key={`${item.type}-${item.id}`} className={styles.card}>
