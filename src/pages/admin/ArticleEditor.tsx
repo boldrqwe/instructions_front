@@ -14,6 +14,9 @@ import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight';
 import BulletList from '@tiptap/extension-bullet-list';
 import OrderedList from '@tiptap/extension-ordered-list';
 import Table from '@tiptap/extension-table';
+import TableRow from '@tiptap/extension-table-row';
+import TableHeader from '@tiptap/extension-table-header';
+import TableCell from '@tiptap/extension-table-cell';
 import { createLowlight, common } from 'lowlight';
 import { Button } from '../../shared/ui/Button';
 import { Card } from '../../shared/ui/Card';
@@ -74,11 +77,15 @@ export function ArticleEditor({ onEditorReady, autoSaveDelayMs }: ArticleEditorP
 
   useEffect(() => {
     if (!hasUnsavedChanges) return;
-    const navigator = navigationContext?.navigator;
-    if (!navigator || typeof navigator.block !== 'function') return;
 
-    const unblock = navigator.block((tx: { retry: () => void }) => {
-      // eslint-disable-next-line no-alert
+    // ↓ даём явный тип «есть block(...)»
+    const nav = (navigationContext?.navigator as unknown) as {
+      block: (cb: (tx: { retry: () => void }) => void) => () => void;
+    };
+
+    if (!nav || typeof nav.block !== 'function') return;
+
+    const unblock = nav.block((tx) => {
       const shouldLeave = window.confirm('У вас есть несохранённые изменения. Выйти со страницы?');
       if (shouldLeave) {
         unblock();
@@ -187,6 +194,10 @@ export function ArticleEditor({ onEditorReady, autoSaveDelayMs }: ArticleEditorP
         TaskList,
         TaskItem.configure({ nested: true }),
         CodeBlockLowlight.configure({ lowlight: safeLowlight }),
+        Table.configure({ resizable: true }),
+        TableRow,
+        TableHeader,
+        TableCell,
         ...(tableExtension ? [tableExtension] : []),
       ],
       editorProps: {
@@ -319,6 +330,8 @@ export function ArticleEditor({ onEditorReady, autoSaveDelayMs }: ArticleEditorP
     async function loadArticle() {
       try {
         setLoading(true);
+        if (!id) return;
+        if (!authHeader) return;
         const article = await fetchArticleById(id, authHeader);
         if (cancelled) return;
         applyArticle(article);
