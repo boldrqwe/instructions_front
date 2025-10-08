@@ -22,8 +22,11 @@ const NotFoundPage = lazy(() =>
 const LoginPage = lazy(() =>
   import('../../pages/LoginPage/LoginPage').then(m => ({ default: m.LoginPage }))
 );
-const ArticleForm = lazy(() =>
-  import('../../pages/ArticleForm/ArticleForm').then(m => ({ default: m.ArticleForm }))
+const DraftsPage = lazy(() =>
+  import('../../pages/admin/DraftsPage').then(m => ({ default: m.DraftsPage }))
+);
+const ArticleEditorPage = lazy(() =>
+  import('../../pages/admin/ArticleEditor').then(m => ({ default: m.ArticleEditor }))
 );
 
 export function AppRouter() {
@@ -38,10 +41,26 @@ export function AppRouter() {
               <Route path="/articles/:slug" element={<ArticlePage />} />
               <Route path="/admin/login" element={<LoginPage />} />
               <Route
+                path="/admin/articles/drafts"
+                element={
+                  <RequireAuth>
+                    <DraftsPage />
+                  </RequireAuth>
+                }
+              />
+              <Route
                 path="/admin/articles/new"
                 element={
                   <RequireAuth>
-                    <ArticleForm mode="create" />
+                    <ArticleEditorPage key="new" />
+                  </RequireAuth>
+                }
+              />
+              <Route
+                path="/admin/articles/:id/edit"
+                element={
+                  <RequireAuth>
+                    <ArticleEditorPage />
                   </RequireAuth>
                 }
               />
