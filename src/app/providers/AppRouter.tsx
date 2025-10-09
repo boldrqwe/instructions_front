@@ -30,8 +30,10 @@ const ArticleEditorPage = lazy(() =>
 );
 
 export function AppRouter() {
+  const basename = import.meta.env.BASE_URL?.replace(/\/$/, '') || undefined;
+
   return (
-    <BrowserRouter>
+    <BrowserRouter basename={basename}>
       <AuthProvider>
         <Layout>
           <Suspense fallback={<PageSpinner />}>
