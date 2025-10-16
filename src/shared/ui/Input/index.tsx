@@ -2,12 +2,18 @@ import { forwardRef } from 'react';
 import type { InputHTMLAttributes, ReactNode } from 'react';
 import styles from './Input.module.css';
 
+/**
+ * Дополнительные свойства поля ввода, поддерживающие подписи, подсказки и ошибки.
+ */
 export interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
   readonly label?: ReactNode;
   readonly hint?: ReactNode;
   readonly error?: ReactNode;
 }
 
+/**
+ * Универсальный компонент `<input>` с подписью и отображением ошибок.
+ */
 export const Input = forwardRef<HTMLInputElement, InputProps>(
   ({ label, hint, error, className = '', id, ...props }, ref) => {
     const inputId = id ?? props.name ?? undefined;

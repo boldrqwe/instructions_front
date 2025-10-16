@@ -7,6 +7,9 @@ import { defaultSchema } from 'hast-util-sanitize';
 import type { Options as AutolinkOptions } from 'rehype-autolink-headings';
 import styles from './MarkdownView.module.css';
 
+/**
+ * Настройки автоссылок для заголовков markdown.
+ */
 const autolinkOptions: AutolinkOptions = {
   behavior: 'wrap',
   properties: {
@@ -14,6 +17,9 @@ const autolinkOptions: AutolinkOptions = {
   },
 };
 
+/**
+ * Безопасная схема очистки HTML: дополняет дефолтную схему разрешёнными атрибутами.
+ */
 const sanitizeSchema = (() => {
   const schema = JSON.parse(JSON.stringify(defaultSchema));
   schema.attributes ??= {};
@@ -32,6 +38,9 @@ interface MarkdownViewProps {
   readonly content: string;
 }
 
+/**
+ * Рендерит markdown-контент с поддержкой GFM, автоссылок и безопасной очистки HTML.
+ */
 export function MarkdownView({ content }: MarkdownViewProps) {
   return (
     <div className={styles.root}>

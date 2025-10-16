@@ -3,16 +3,25 @@ import type { Editor } from '@tiptap/react';
 import { slugify } from '../shared/lib/slugify';
 import styles from './ArticleTOC.module.css';
 
+/**
+ * Описание заголовка, найденного в редакторе статьи.
+ */
 interface HeadingItem {
   readonly id: string;
   readonly level: number;
   readonly text: string;
 }
 
+/**
+ * Параметры компонента оглавления редактора статей.
+ */
 interface ArticleTOCProps {
   readonly editor: Editor | null;
 }
 
+/**
+ * Формирует оглавление на основе содержимого редактора Tiptap и подсвечивает активный заголовок.
+ */
 export function ArticleTOC({ editor }: ArticleTOCProps) {
   const [headings, setHeadings] = useState<HeadingItem[]>([]);
   const [activeId, setActiveId] = useState<string | null>(null);
@@ -120,7 +129,9 @@ export function ArticleTOC({ editor }: ArticleTOCProps) {
             ×
           </button>
         </div>
-        <nav className={styles.list}>{outline.length > 0 ? outline : <p className={styles.empty}>Добавьте заголовки, чтобы увидеть оглавление</p>}</nav>
+        <nav className={styles.list}>
+          {outline.length > 0 ? outline : <p className={styles.empty}>Добавьте заголовки, чтобы увидеть оглавление</p>}
+        </nav>
       </div>
       {isMobileOpen ? <div className={styles.backdrop} onClick={() => setMobileOpen(false)} /> : null}
     </aside>

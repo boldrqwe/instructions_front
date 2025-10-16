@@ -37,13 +37,22 @@ import { useAuth } from '../../shared/model/auth';
 import { slugify } from '../../shared/lib/slugify';
 import styles from './ArticleEditor.module.css';
 
+/**
+ * Свойства редактора статьи: колбэк готовности и задержка авто-сохранения.
+ */
 interface ArticleEditorProps {
   readonly onEditorReady?: (editor: Editor) => void;
   readonly autoSaveDelayMs?: number;
 }
 
+/**
+ * Максимальный размер изображения обложки или вставляемых картинок (10 МБ).
+ */
 const MAX_IMAGE_SIZE = 10 * 1024 * 1024;
 
+/**
+ * Полнофункциональный редактор статей с автосохранением, загрузкой изображений и предпросмотром.
+ */
 export function ArticleEditor({ onEditorReady, autoSaveDelayMs }: ArticleEditorProps) {
   const { id } = useParams();
   const { authHeader } = useAuth();
@@ -115,6 +124,9 @@ export function ArticleEditor({ onEditorReady, autoSaveDelayMs }: ArticleEditorP
     };
   }, []);
 
+  /**
+   * Сохраняет черновик статьи на сервере и обновляет локальное состояние.
+   */
   const persistDraft = useCallback(async (): Promise<Article | null> => {
     if (!authHeader) return null;
     setSaveStatus('saving');
@@ -149,6 +161,9 @@ export function ArticleEditor({ onEditorReady, autoSaveDelayMs }: ArticleEditorP
     latestPersistDraft.current = persistDraft;
   }, [persistDraft]);
 
+  /**
+   * Планирует отложенное автосохранение и помечает форму как изменённую.
+   */
   const scheduleAutoSave = useCallback(() => {
     if (autoSaveTimer.current) {
       window.clearTimeout(autoSaveTimer.current);
@@ -160,8 +175,12 @@ export function ArticleEditor({ onEditorReady, autoSaveDelayMs }: ArticleEditorP
     }, autoSaveDelay);
   }, [autoSaveDelay]);
 
+  /**
+   * Базовая подсветка синтаксиса для блоков кода.
+   */
   const baseLowlight = createLowlight(common);
 
+  // Защита от отсутствия метода highlight в окружении.
   const safeLowlight =
     typeof (baseLowlight as { highlight?: unknown }).highlight === 'function'
       ? baseLowlight
@@ -171,6 +190,9 @@ export function ArticleEditor({ onEditorReady, autoSaveDelayMs }: ArticleEditorP
           registerLanguage: () => undefined,
         };
 
+  /**
+   * Конфигурация расширения таблиц, если оно доступно в окружении.
+   */
   const tableExtension = Table?.configure
     ? Table.configure({ resizable: true })
     : null;
@@ -246,6 +268,9 @@ export function ArticleEditor({ onEditorReady, autoSaveDelayMs }: ArticleEditorP
     editorRef.current = editor;
   }, [editor]);
 
+  /**
+   * Заменяет временный src изображения на постоянный URL после загрузки.
+   */
   const replaceImageSource = useCallback((ed: Editor, currentSrc: string, nextSrc: string) => {
     const { state, view } = ed;
     state.doc.descendants((node, pos) => {
@@ -258,6 +283,9 @@ export function ArticleEditor({ onEditorReady, autoSaveDelayMs }: ArticleEditorP
     });
   }, []);
 
+  /**
+   * Удаляет изображение из редактора по известному источнику.
+   */
   const removeImageBySrc = useCallback((ed: Editor, targetSrc: string) => {
     const { state, view } = ed;
     state.doc.descendants((node, pos) => {
@@ -270,6 +298,9 @@ export function ArticleEditor({ onEditorReady, autoSaveDelayMs }: ArticleEditorP
     });
   }, []);
 
+  /**
+   * Загружает вставленные изображения: добавляет превью и заменяет на URL после загрузки.
+   */
   const handleImageFiles = useCallback(
     async (ed: Editor, files: File[]) => {
       if (!authHeader) return;
@@ -348,6 +379,9 @@ export function ArticleEditor({ onEditorReady, autoSaveDelayMs }: ArticleEditorP
     };
   }, [authHeader, id]);
 
+  /**
+   * Заполняет форму редактора данными загруженной статьи.
+   */
   const applyArticle = useCallback(
     (article: Article) => {
       setArticleId(article.id);
@@ -377,6 +411,9 @@ export function ArticleEditor({ onEditorReady, autoSaveDelayMs }: ArticleEditorP
 
   const isNewArticle = useMemo(() => !articleId, [articleId]);
 
+  /**
+   * Сохраняет черновик по кнопке и перенаправляет на страницу редактирования при создании.
+   */
   async function handleSaveButton() {
     const result = await persistDraft();
     if (result && isNewArticle) {
@@ -384,6 +421,9 @@ export function ArticleEditor({ onEditorReady, autoSaveDelayMs }: ArticleEditorP
     }
   }
 
+  /**
+   * Публикует текущую статью после сохранения черновика.
+   */
   async function handlePublish() {
     const saved = await persistDraft();
     if (!saved || !authHeader) return;
@@ -397,6 +437,9 @@ export function ArticleEditor({ onEditorReady, autoSaveDelayMs }: ArticleEditorP
     }
   }
 
+  /**
+   * Снимает публикацию статьи и возвращает её в черновики.
+   */
   async function handleUnpublish() {
     if (!articleId || !authHeader) return;
     try {
@@ -409,6 +452,9 @@ export function ArticleEditor({ onEditorReady, autoSaveDelayMs }: ArticleEditorP
     }
   }
 
+  /**
+   * Обрабатывает выбор файла обложки: проверяет размер и загружает на сервер.
+   */
   async function handleCoverChange(event: ChangeEvent<HTMLInputElement>) {
     if (!authHeader || !event.target.files?.[0]) return;
     const file = event.target.files[0];
@@ -433,6 +479,9 @@ export function ArticleEditor({ onEditorReady, autoSaveDelayMs }: ArticleEditorP
     }
   }
 
+  /**
+   * Набор кнопок панели инструментов редактора с командами Tiptap.
+   */
   const toolbarButtons = useMemo(
     () => [
       {

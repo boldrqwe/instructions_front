@@ -7,28 +7,54 @@ import { RequireAuth } from '../../shared/ui/RequireAuth';
 
 // ВАЖНО: во всех страницах должны быть именованные экспорты:
 // export function HomePage() { ... } и т.п.
+/**
+ * Лениво загружает домашнюю страницу, чтобы не тянуть лишний код при первом открытии.
+ */
 const HomePage = lazy(() =>
   import('../../pages/HomePage/HomePage').then(m => ({ default: m.HomePage }))
 );
+/**
+ * Лениво подключает страницу поиска; подставляет именованный экспорт по умолчанию.
+ */
 const SearchPage = lazy(() =>
   import('../../pages/SearchPage/SearchPage').then(m => ({ default: m.SearchPage }))
 );
+/**
+ * Загружает страницу статьи по требованию, уменьшая стартовый бандл.
+ */
 const ArticlePage = lazy(() =>
   import('../../pages/ArticlePage/ArticlePage').then(m => ({ default: m.ArticlePage }))
 );
+/**
+ * Импортирует страницу 404 только при необходимости.
+ */
 const NotFoundPage = lazy(() =>
   import('../../pages/NotFoundPage/NotFoundPage').then(m => ({ default: m.NotFoundPage }))
 );
+/**
+ * Импортирует страницу авторизации администратора лениво.
+ */
 const LoginPage = lazy(() =>
   import('../../pages/LoginPage/LoginPage').then(m => ({ default: m.LoginPage }))
 );
+/**
+ * Динамическая загрузка списка черновиков для административного раздела.
+ */
 const DraftsPage = lazy(() =>
   import('../../pages/admin/DraftsPage').then(m => ({ default: m.DraftsPage }))
 );
+/**
+ * Ленивый импорт редактора статей, чтобы не грузить тяжелые зависимости заранее.
+ */
 const ArticleEditorPage = lazy(() =>
   import('../../pages/admin/ArticleEditor').then(m => ({ default: m.ArticleEditor }))
 );
 
+/**
+ * Настраивает корневую маршрутизацию приложения, оборачивая страницы в провайдер авторизации,
+ * макет и обработку ленивых загрузок.
+ * @returns JSX с деревом `<BrowserRouter />` и определенными маршрутами.
+ */
 export function AppRouter() {
   return (
     <BrowserRouter>

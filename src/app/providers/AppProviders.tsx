@@ -8,6 +8,11 @@ interface AppProvidersProps {
   readonly children: ReactNode;
 }
 
+/**
+ * Собирает общие провайдеры приложения: обработку ошибок, React Query и тему оформления.
+ * @param props.children Дочернее дерево, которое нужно обернуть провайдерами.
+ * @returns JSX-обертка для глобальных контекстов.
+ */
 export function AppProviders({ children }: AppProvidersProps) {
   return (
     <AppErrorBoundary>

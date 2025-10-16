@@ -5,11 +5,19 @@ import { clampSnippet } from '../../shared/lib/clampSnippet';
 import { debounce } from '../../shared/lib/debounce';
 import styles from './SearchPage.module.css';
 
+/**
+ * Количество результатов на странице поиска.
+ */
 const PAGE_SIZE = 10;
 
-// вспомогательный тип: debounced функция + cancel
+/**
+ * Вспомогательный тип debounced-функции с методом cancel.
+ */
 type DebouncedFn = ((...args: readonly unknown[]) => void) & { cancel: () => void };
 
+/**
+ * Страница поиска по статьям и разделам с debounce и пагинацией.
+ */
 export function SearchPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const queryParam = searchParams.get('q') ?? '';

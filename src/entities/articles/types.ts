@@ -1,5 +1,11 @@
+/**
+ * Возможные статусы статьи в административной панели.
+ */
 export type ArticleStatus = 'DRAFT' | 'PUBLISHED';
 
+/**
+ * Полное описание статьи, возвращаемое API.
+ */
 export interface Article {
   readonly id: string;
   readonly title: string;
@@ -14,6 +20,9 @@ export interface Article {
   readonly updatedAt: string;
 }
 
+/**
+ * Ответ API со списком статей и параметрами пагинации.
+ */
 export interface ArticleListResponse {
   readonly items: Article[];
   readonly page: number;
@@ -21,6 +30,9 @@ export interface ArticleListResponse {
   readonly total: number;
 }
 
+/**
+ * Параметры фильтрации и пагинации списка статей.
+ */
 export interface ArticleQuery {
   readonly status?: ArticleStatus | 'ALL';
   readonly query?: string;
@@ -28,6 +40,9 @@ export interface ArticleQuery {
   readonly size?: number;
 }
 
+/**
+ * Набор полей, необходимых для создания или обновления статьи.
+ */
 export interface ArticlePayload {
   readonly title: string;
   readonly slug: string;
@@ -38,6 +53,9 @@ export interface ArticlePayload {
   readonly contentJson: unknown;
 }
 
+/**
+ * Ответ сервера при загрузке изображения.
+ */
 export interface UploadImageResponse {
   readonly url: string;
 }

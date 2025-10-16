@@ -1,12 +1,18 @@
 import { useState, type FormEvent } from 'react';
 import { useAuth } from '../../shared/model/auth';
 
+/**
+ * Режим работы формы статьи: создание или редактирование.
+ */
 export type ArticleFormMode = 'create' | 'edit';
 
 interface ArticleFormProps {
   mode: ArticleFormMode;
 }
 
+/**
+ * Простая форма для создания или редактирования статьи через API.
+ */
 export function ArticleForm({ mode }: ArticleFormProps) {
   const [title, setTitle] = useState('');
   const [slug, setSlug] = useState('');
@@ -17,6 +23,9 @@ export function ArticleForm({ mode }: ArticleFormProps) {
       import.meta.env.VITE_API_BASE_URL?.replace(/\/$/, '') ??
       'http://localhost:8080/api/v1';
 
+  /**
+   * Отправляет данные формы на сервер и сообщает пользователю о результате.
+   */
   async function onSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const payload = { title, slug, body };

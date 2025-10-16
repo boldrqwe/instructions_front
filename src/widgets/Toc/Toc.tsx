@@ -1,6 +1,9 @@
 import type { Toc as TocType } from '../../entities/article/model/types';
 import styles from './Toc.module.css';
 
+/**
+ * Параметры таблицы содержимого статьи.
+ */
 interface TocProps {
   readonly items: TocType['items'];
   readonly activeId?: string;
@@ -9,6 +12,9 @@ interface TocProps {
   readonly onClose?: () => void;
 }
 
+/**
+ * Отображает оглавление статьи с подсветкой активного раздела и возможностью навигации.
+ */
 export function Toc({ items, activeId, onNavigate, isOpen = true, onClose }: TocProps) {
   return (
     <aside className={`${styles.root} ${isOpen ? styles.open : styles.closed}`}>

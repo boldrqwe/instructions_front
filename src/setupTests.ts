@@ -7,11 +7,17 @@ declare global {
   }
 }
 
+/**
+ * Сигнатура колбэка IntersectionObserver, используемая в моках.
+ */
 type ObserverCallback = (
   entries: IntersectionObserverEntry[],
   observer: IntersectionObserver,
 ) => void;
 
+/**
+ * Тестовая реализация IntersectionObserver для управления пересечениями вручную.
+ */
 export class MockIntersectionObserver implements IntersectionObserver {
   public static instances: MockIntersectionObserver[] = [];
 
@@ -44,6 +50,9 @@ export class MockIntersectionObserver implements IntersectionObserver {
     return [];
   }
 
+  /**
+   * Форсирует вызов callback с переданными записями пересечения.
+   */
   public trigger(entries: IntersectionObserverEntry[]) {
     this.callback(entries, this);
   }

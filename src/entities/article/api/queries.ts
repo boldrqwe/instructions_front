@@ -25,6 +25,10 @@ interface FrontendPage<T> {
 }
 
 /** ======================= Список статей ======================= */
+/**
+ * Получает список статей с параметрами пагинации через React Query.
+ * @param params Параметры запроса к API.
+ */
 export function useArticlesQuery(params: ListArticlesParams) {
   return useQuery({
     queryKey: ['articles', params] as const,
@@ -34,6 +38,11 @@ export function useArticlesQuery(params: ListArticlesParams) {
 }
 
 /** ======================= Одна статья ======================= */
+/**
+ * Загружает данные одной статьи по slug.
+ * @param slug ЧПУ идентификатор статьи.
+ * @param enabled Флаг для отключения запроса (например, пока slug пустой).
+ */
 export function useArticleQuery(slug: string, enabled = true) {
   return useQuery<Article>({
     queryKey: ['article', slug] as const,
@@ -43,6 +52,10 @@ export function useArticleQuery(slug: string, enabled = true) {
 }
 
 /** ======================= Оглавление ======================= */
+/**
+ * Загружает таблицу содержимого для указанной статьи.
+ * @param articleId Идентификатор статьи, для которой нужно оглавление.
+ */
 export function useTocQuery(articleId: string | undefined) {
   return useQuery<Toc>({
     queryKey: ['toc', articleId] as const,
@@ -52,6 +65,11 @@ export function useTocQuery(articleId: string | undefined) {
 }
 
 /** ======================= Поиск ======================= */
+/**
+ * Выполняет поиск по статьям и нормализует ответ сервера.
+ * @param params Параметры поискового запроса.
+ * @param enabled Управляет включением запроса (например, при пустой строке).
+ */
 export function useSearchQuery(params: SearchParams, enabled = true) {
   return useQuery<FrontendPage<SearchResult>>({
     queryKey: ['search', params],

@@ -4,6 +4,9 @@ import { useArticlesQuery } from '../../entities/article/api/queries';
 import { clampSnippet } from '../../shared/lib/clampSnippet';
 import styles from './HomePage.module.css';
 
+/**
+ * Главная страница, отображающая список опубликованных статей.
+ */
 export function HomePage() {
   const params = useMemo(() => ({ status: 'PUBLISHED' as const }), []);
   const { data, isLoading, isError } = useArticlesQuery(params);
@@ -53,7 +56,7 @@ export function HomePage() {
           База знаний длинных инструкций
         </h1>
         <p className={styles.subtitle}>
-          Находите статьи, переходите к нужным секциям и изучайте инструкции в удобном формате.
+          Находите статьи, переходите к ужным секциям и изучайте инструкции в удобном формате.
         </p>
       </header>
 

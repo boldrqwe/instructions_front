@@ -1,7 +1,16 @@
+/**
+ * Дополнительные параметры прокрутки к якорю.
+ */
 interface ScrollToAnchorOptions {
   readonly smooth?: boolean;
 }
 
+/**
+ * Прокручивает страницу к элементу с указанным якорем и устанавливает фокус для доступности.
+ * @param anchor Идентификатор или якорь вида `#section`.
+ * @param options Управляет плавностью прокрутки.
+ * @returns `true`, если элемент найден и прокрутка выполнена, иначе `false`.
+ */
 export function scrollToAnchor(anchor: string, options: ScrollToAnchorOptions = {}) {
   const id = anchor.startsWith('#') ? anchor.slice(1) : anchor;
   const element =
