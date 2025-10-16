@@ -3,6 +3,9 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../shared/model/auth';
 import styles from './LoginPage.module.css';
 
+/**
+ * Страница входа администратора в систему публикации статей.
+ */
 export function LoginPage() {
   const { login } = useAuth();
   const [u, setU] = useState('');
@@ -12,6 +15,9 @@ export function LoginPage() {
   const loc = useLocation();
   const redirectTo = (loc.state as any)?.from ?? '/';
 
+  /**
+   * Отправляет форму входа и перенаправляет пользователя при успехе.
+   */
   async function onSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const ok = await login(u, p);

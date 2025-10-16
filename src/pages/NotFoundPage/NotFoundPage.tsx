@@ -1,6 +1,9 @@
 import { Link } from 'react-router-dom';
 import styles from './NotFoundPage.module.css';
 
+/**
+ * Страница 404 с предложением вернуться на главную.
+ */
 export function NotFoundPage() {
   return (
     <section className={styles.root} aria-labelledby="not-found-title">

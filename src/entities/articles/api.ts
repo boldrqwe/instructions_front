@@ -6,19 +6,36 @@ import type {
   UploadImageResponse,
 } from './types';
 
+/**
+ * Базовый URL для всех запросов к API; берётся из окружения либо локального значения по умолчанию.
+ */
 const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL?.replace(/\/$/, '') ??
   'http://localhost:8080/api/v1';
 
+/**
+ * Расширенные опции запроса с поддержкой заголовка авторизации.
+ */
 interface RequestOptions extends RequestInit {
   readonly authHeader?: string | null;
 }
 
+/**
+ * Дополняет относительный путь до API абсолютным адресом.
+ * @param path Относительный путь запроса.
+ * @returns Абсолютный URL с учётом базового адреса.
+ */
 function withBase(path: string): string {
   const normalized = path.startsWith('/') ? path : `/${path}`;
   return `${API_BASE_URL}${normalized}`;
 }
 
+/**
+ * Выполняет HTTP-запрос к API и приводит ответ к нужному типу.
+ * @param path Относительный путь запроса.
+ * @param options Дополнительные опции запроса, включая заголовок авторизации.
+ * @throws Ошибка, если сервер вернул статус, отличный от 2xx.
+ */
 async function apiRequest<T>(path: string, options: RequestOptions = {}): Promise<T> {
   const { authHeader, headers, ...rest } = options;
   const response = await fetch(withBase(path), {
@@ -47,6 +64,11 @@ async function apiRequest<T>(path: string, options: RequestOptions = {}): Promis
   return (await response.text()) as unknown as T;
 }
 
+/**
+ * Получает список статей с учётом фильтров и пагинации.
+ * @param query Параметры фильтрации и пагинации.
+ * @param authHeader Заголовок авторизации администратора.
+ */
 export async function fetchArticles(
   query: ArticleQuery,
   authHeader: string,
@@ -62,14 +84,23 @@ export async function fetchArticles(
   return apiRequest<ArticleListResponse>(path, { authHeader });
 }
 
+/**
+ * Загружает данные статьи по идентификатору для административного интерфейса.
+ */
 export function fetchArticleById(id: string, authHeader: string): Promise<Article> {
   return apiRequest<Article>(`/articles/${id}`, { authHeader });
 }
 
+/**
+ * Получает опубликованную статью по её slug.
+ */
 export function fetchArticleBySlug(slug: string): Promise<Article> {
   return apiRequest<Article>(`/articles/by-slug/${slug}`);
 }
 
+/**
+ * Создаёт новую статью через API.
+ */
 export function createArticle(
   payload: ArticlePayload,
   authHeader: string,
@@ -84,6 +115,9 @@ export function createArticle(
   });
 }
 
+/**
+ * Обновляет существующую статью по идентификатору.
+ */
 export function updateArticle(
   id: string,
   payload: ArticlePayload,
@@ -99,6 +133,9 @@ export function updateArticle(
   });
 }
 
+/**
+ * Переводит статью в опубликованный статус.
+ */
 export function publishArticle(id: string, authHeader: string): Promise<Article> {
   return apiRequest<Article>(`/articles/${id}/publish`, {
     method: 'POST',
@@ -106,6 +143,9 @@ export function publishArticle(id: string, authHeader: string): Promise<Article>
   });
 }
 
+/**
+ * Снимает публикацию статьи, переводя её обратно в черновик.
+ */
 export function unpublishArticle(id: string, authHeader: string): Promise<Article> {
   return apiRequest<Article>(`/articles/${id}/unpublish`, {
     method: 'POST',
@@ -113,6 +153,9 @@ export function unpublishArticle(id: string, authHeader: string): Promise<Articl
   });
 }
 
+/**
+ * Загружает изображение статьи и возвращает URL сохранённого файла.
+ */
 export function uploadArticleImage(
   file: File,
   authHeader: string,

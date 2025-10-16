@@ -1,10 +1,16 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 import type { ReactNode } from 'react';
 
+/**
+ * Внутреннее представление авторизационных данных в локальном состоянии.
+ */
 type AuthState =
-    | { schema: 'bearer'; token: string }
-    | { schema: 'basic'; credentials: string };
+  | { schema: 'bearer'; token: string }
+  | { schema: 'basic'; credentials: string };
 
+/**
+ * Данные, предоставляемые контекстом авторизации компонентам приложения.
+ */
 interface AuthContextType {
   authHeader: string | null;
   isAdmin: boolean;
@@ -12,8 +18,15 @@ interface AuthContextType {
   logout: () => void;
 }
 
+/**
+ * Контекст, предоставляющий авторизационные данные и методы входа/выхода.
+ */
 const AuthContext = createContext<AuthContextType>(null!);
 
+/**
+ * Провайдер авторизации, управляющий хранением токена и проверкой административных прав.
+ * @param props.children Компоненты, которым требуется доступ к данным авторизации.
+ */
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [authState, setAuthState] = useState<AuthState | null>(() => {
     const stored = localStorage.getItem('token');
@@ -46,16 +59,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (!authState) return;
     let isCancelled = false;
 
+    /**
+     * Загружает профиль пользователя и проверяет наличие роли администратора.
+     */
     async function loadProfile(state: AuthState) {
       try {
         const authorizationHeader =
-            state.schema === 'bearer'
-                ? `Bearer ${state.token}`
-                : `Basic ${state.credentials}`;
+          state.schema === 'bearer'
+            ? `Bearer ${state.token}`
+            : `Basic ${state.credentials}`;
 
         const baseUrl =
-            import.meta.env.VITE_API_BASE_URL?.replace(/\/$/, '') ??
-            'http://localhost:8080/api/v1';
+          import.meta.env.VITE_API_BASE_URL?.replace(/\/$/, '') ??
+          'http://localhost:8080/api/v1';
 
         // ✅ вызываем /auth/profile, если есть
         const response = await fetch(`${baseUrl}/auth/profile`, {
@@ -71,7 +87,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (isCancelled) return;
 
         const hasAdminRole = Boolean(
-            data.authenticated && data.roles?.includes('ROLE_ADMIN')
+          data.authenticated && data.roles?.includes('ROLE_ADMIN')
         );
         setIsAdmin(hasAdminRole);
       } catch (err) {
@@ -89,14 +105,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
   }, [authState]);
 
+  /**
+   * Выполняет авторизацию по логину и паролю и сохраняет токен в localStorage.
+   * @returns `true`, если авторизация прошла успешно.
+   */
   async function login(username: string, password: string): Promise<boolean> {
     try {
       const tokenPayload = `${username}:${password}`;
       const encodedToken = window.btoa(tokenPayload);
 
       const baseUrl =
-          import.meta.env.VITE_API_BASE_URL?.replace(/\/$/, '') ??
-          'http://localhost:8080/api/v1';
+        import.meta.env.VITE_API_BASE_URL?.replace(/\/$/, '') ??
+        'http://localhost:8080/api/v1';
 
       const response = await fetch(`${baseUrl}/auth/login`, {
         method: 'POST',
@@ -118,13 +138,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
 
       const nextState: AuthState =
-          data && typeof data.token === 'string'
-              ? { schema: 'bearer', token: data.token }
-              : { schema: 'basic', credentials: encodedToken };
+        data && typeof data.token === 'string'
+          ? { schema: 'bearer', token: data.token }
+          : { schema: 'basic', credentials: encodedToken };
 
       localStorage.setItem('token', JSON.stringify(nextState));
       setAuthState(nextState);
-      setIsAdmin(true); // ✅ сразу считаем админом, потом loadProfile уточнит
+      setIsAdmin(true); //  сразу считаем админом, потом loadProfile уточнит
 
       return true;
     } catch (err) {
@@ -133,6 +153,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }
 
+  /**
+   * Сбрасывает состояние авторизации и удаляет токен из localStorage.
+   */
   function logout() {
     setAuthState(null);
     setIsAdmin(false);
@@ -140,25 +163,34 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   const authHeader = authState
-      ? authState.schema === 'bearer'
-          ? `Bearer ${authState.token}`
-          : `Basic ${authState.credentials}`
-      : null;
+    ? authState.schema === 'bearer'
+      ? `Bearer ${authState.token}`
+      : `Basic ${authState.credentials}`
+    : null;
 
   return (
-      <AuthContext.Provider value={{ authHeader, isAdmin, login, logout }}>
-        {children}
-      </AuthContext.Provider>
+    <AuthContext.Provider value={{ authHeader, isAdmin, login, logout }}>
+      {children}
+    </AuthContext.Provider>
   );
 }
 
+/**
+ * Возвращает контекст авторизации; удобная обёртка над `useContext`.
+ */
 export const useAuth = () => useContext(AuthContext);
 
+/**
+ * Ответ эндпоинта профиля с ролями пользователя.
+ */
 interface AuthProfileResponse {
   readonly authenticated: boolean;
   readonly roles?: string[];
 }
 
+/**
+ * Ответ авторизации, содержащий bearer-токен при его наличии.
+ */
 interface AuthLoginResponse {
   readonly token?: string;
 }

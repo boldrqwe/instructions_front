@@ -2,6 +2,9 @@ import { useEffect, useState } from 'react';
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import styles from './SearchBar.module.css';
 
+/**
+ * Строка поиска, синхронизирующая значение с query-параметром `q` на странице поиска.
+ */
 export function SearchBar() {
   const navigate = useNavigate();
   const location = useLocation();

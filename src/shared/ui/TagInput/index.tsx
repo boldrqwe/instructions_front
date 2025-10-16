@@ -2,6 +2,9 @@ import { useCallback, useId, useState } from 'react';
 import type { KeyboardEvent, ChangeEvent } from 'react';
 import styles from './TagInput.module.css';
 
+/**
+ * Свойства компонента ввода тегов.
+ */
 interface TagInputProps {
   readonly value: string[];
   readonly onChange: (next: string[]) => void;
@@ -10,6 +13,9 @@ interface TagInputProps {
   readonly disabled?: boolean;
 }
 
+/**
+ * Компонент для добавления и удаления тегов с поддержкой разделения запятыми и клавишей Enter.
+ */
 export function TagInput({
   value,
   onChange,

@@ -10,10 +10,16 @@ import { Toc } from '../../widgets/Toc/Toc';
 import { NotFoundPage } from '../NotFoundPage/NotFoundPage';
 import styles from './ArticlePage.module.css';
 
+/**
+ * Узнаёт, является ли переданный объект HTML-элементом.
+ */
 function isHTMLElement(el: unknown): el is HTMLElement {
   return el instanceof HTMLElement;
 }
 
+/**
+ * Страница отображения статьи с оглавлением и прокруткой к разделам.
+ */
 export function ArticlePage() {
   const { slug } = useParams();
   const location = useLocation();

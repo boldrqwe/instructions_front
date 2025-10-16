@@ -8,6 +8,9 @@ import type {
   Toc,
 } from '../model/types';
 
+/**
+ * Параметры запроса списка статей.
+ */
 export interface ListArticlesParams {
   readonly status?: ArticleStatus;
   readonly query?: string;
@@ -15,6 +18,10 @@ export interface ListArticlesParams {
   readonly size?: number;
 }
 
+/**
+ * Загружает список статей с сервера с учётом фильтров и пагинации.
+ * @param params Параметры фильтрации и пагинации.
+ */
 export async function listArticles(params: ListArticlesParams = {}) {
   const searchParams = new URLSearchParams();
   if (params.status) {
@@ -34,20 +41,32 @@ export async function listArticles(params: ListArticlesParams = {}) {
   return apiClient<Page<ArticleSummary>>(`/articles${suffix}`);
 }
 
+/**
+ * Получает статью по slug для отображения на странице чтения.
+ */
 export function getArticleBySlug(slug: string) {
   return apiClient<Article>(`/articles/by-slug/${slug}`);
 }
 
+/**
+ * Загружает таблицу содержимого статьи по идентификатору.
+ */
 export function getToc(articleId: string) {
   return apiClient<Toc>(`/articles/${articleId}/toc`);
 }
 
+/**
+ * Параметры запроса поиска по статьям.
+ */
 export interface SearchParams {
   readonly query: string;
   readonly page?: number;
   readonly size?: number;
 }
 
+/**
+ * Выполняет поисковый запрос к API и возвращает страницу результатов.
+ */
 export function search(params: SearchParams) {
   const searchParams = new URLSearchParams();
   searchParams.set('query', params.query);

@@ -2,6 +2,10 @@ import { NavLink } from 'react-router-dom';
 import { useAuth } from '../../model/auth';
 import styles from './Layout.module.css';
 
+/**
+ * Базовый макет приложения с шапкой навигации и административными ссылками.
+ * @param props.children Контент страницы, который будет отрисован в `<main>`.
+ */
 export function Layout({ children }: { children: React.ReactNode }) {
   const { isAdmin, logout } = useAuth();
   return (
