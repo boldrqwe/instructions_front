@@ -37,6 +37,13 @@ interface ArticleEditorProps {
 
 const MAX_IMAGE_SIZE = 10 * 1024 * 1024;
 
+/**
+ * Интерактивный редактор статей с автосохранением, загрузкой изображений и предпросмотром.
+ *
+ * @param onEditorReady Колбэк, вызываемый после инициализации редактора Tiptap.
+ * @param autoSaveDelayMs Пользовательская задержка перед автосохранением (мс).
+ * @returns Полноценная страница редактора с формой метаданных и предпросмотром.
+ */
 export function ArticleEditor({ onEditorReady, autoSaveDelayMs }: ArticleEditorProps) {
     const { id } = useParams();
     const { authHeader } = useAuth();

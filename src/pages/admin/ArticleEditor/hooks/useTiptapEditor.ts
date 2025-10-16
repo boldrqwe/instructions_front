@@ -20,6 +20,15 @@ type UseTiptapParams = {
     ariaLabel?: string;
 };
 
+/**
+ * Хук-обёртка над `useEditor` из Tiptap с преднастроенными расширениями и обработкой изображений.
+ *
+ * @param onUpdate Колбэк, вызываемый при каждом обновлении содержимого редактора.
+ * @param onFiles Обработчик вставки/перетаскивания изображений.
+ * @param editorClassName CSS-класс, навешиваемый на область редактирования.
+ * @param ariaLabel ARIA-метка для доступности редактора.
+ * @returns Экземпляр редактора Tiptap или `null`, пока он не инициализирован.
+ */
 export function useTiptapEditor({
                                     onUpdate,
                                     onFiles,

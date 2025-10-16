@@ -23,6 +23,23 @@ type Props = {
     onCoverRemove: () => void;
 };
 
+/**
+ * Форма редактирования метаданных статьи: заголовка, slug, описания, тегов и обложки.
+ *
+ * @param props.title Текущий заголовок статьи.
+ * @param props.slug Адресная часть (slug), используемая в URL.
+ * @param props.summary Краткое описание для списка статей и SEO.
+ * @param props.tags Набор тегов, описывающих статью.
+ * @param props.coverImageUrl URL текущей обложки статьи.
+ * @param props.isCoverUploading Флаг состояния загрузки изображения.
+ * @param props.uploadError Текст ошибки загрузки, если она произошла.
+ * @param props.onTitleChange Обработчик изменения заголовка.
+ * @param props.onSlugChange Обработчик изменения slug.
+ * @param props.onSummaryChange Обработчик изменения краткого описания.
+ * @param props.onTagsChange Обработчик изменения списка тегов.
+ * @param props.onCoverChange Обработчик выбора файла обложки.
+ * @param props.onCoverRemove Обработчик удаления текущей обложки.
+ */
 export function ArticleMetaForm(props: Props) {
     const {
         title, slug, summary, tags, coverImageUrl, isCoverUploading, uploadError,

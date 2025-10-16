@@ -1,5 +1,12 @@
 import type { Editor } from '@tiptap/react';
 
+/**
+ * Заменяет временный src изображения в редакторе на постоянный URL после загрузки.
+ *
+ * @param ed Экземпляр редактора Tiptap.
+ * @param currentSrc Адрес изображения, который нужно заменить (обычно `blob:`-URL).
+ * @param nextSrc Новый адрес изображения из API.
+ */
 export function replaceImageSource(ed: Editor, currentSrc: string, nextSrc: string) {
     const { state, view } = ed;
     state.doc.descendants((node, pos) => {
@@ -12,6 +19,12 @@ export function replaceImageSource(ed: Editor, currentSrc: string, nextSrc: stri
     });
 }
 
+/**
+ * Удаляет изображение из редактора по совпадению src (например, при ошибке загрузки).
+ *
+ * @param ed Экземпляр редактора Tiptap.
+ * @param targetSrc Адрес изображения, которое нужно удалить.
+ */
 export function removeImageBySrc(ed: Editor, targetSrc: string) {
     const { state, view } = ed;
     state.doc.descendants((node, pos) => {
