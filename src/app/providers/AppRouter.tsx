@@ -56,8 +56,10 @@ const ArticleEditorPage = lazy(() =>
  * @returns JSX с деревом `<BrowserRouter />` и определенными маршрутами.
  */
 export function AppRouter() {
+  const basename = import.meta.env.BASE_URL?.replace(/\/$/, '') || undefined;
+
   return (
-    <BrowserRouter>
+    <BrowserRouter basename={basename}>
       <AuthProvider>
         <Layout>
           <Suspense fallback={<PageSpinner />}>
