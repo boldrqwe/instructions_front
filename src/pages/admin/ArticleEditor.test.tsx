@@ -24,6 +24,9 @@ vi.mock('../../entities/articles/api', () => ({
   fetchArticles: vi.fn(),
 }));
 
+/**
+ * Рендерит редактор в тестовом роутере с указанным путём.
+ */
 function renderWithRouter(path: string, editorProps?: ComponentProps<typeof ArticleEditor>) {
   return render(
     <MemoryRouter initialEntries={[path]}>
@@ -40,6 +43,9 @@ describe('ArticleEditor', () => {
     vi.clearAllMocks();
   });
 
+  /**
+   * Убедимся, что список заголовков в боковой панели обновляется при добавлении нового заголовка.
+   */
   it('создаёт оглавление после вставки заголовка', async () => {
     const editorRef: { current: TiptapEditor | null } = { current: null };
     renderWithRouter('/admin/articles/new', {
@@ -65,6 +71,9 @@ describe('ArticleEditor', () => {
     });
   });
 
+  /**
+   * Проверяем загрузку изображений через буфер обмена и замену временного src.
+   */
   it('загружает изображение при вставке изображения', async () => {
     uploadImageMock.mockResolvedValue({ url: 'https://cdn/img.png' });
     const editorRef: { current: TiptapEditor | null } = { current: null };
@@ -101,6 +110,9 @@ describe('ArticleEditor', () => {
     });
   });
 
+  /**
+   * Тестируем автосохранение и отправку обновлений на сервер.
+   */
   it('выполняет автосохранение через 1500 мс', async () => {
     const article = {
       id: 'a1',

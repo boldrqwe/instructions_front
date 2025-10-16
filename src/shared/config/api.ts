@@ -1,13 +1,22 @@
+/**
+ * Структура ошибки, возвращаемой API.
+ */
 export interface ApiErrorPayload {
   readonly code: string;
   readonly message: string;
   readonly status?: number;
 }
 
+/**
+ * Кастомная ошибка, описывающая результат неудачного HTTP-запроса.
+ */
 export class ApiError extends Error {
   public readonly code: string;
   public readonly status?: number;
 
+  /**
+   * @param payload Данные об ошибке, полученные от сервера.
+   */
   public constructor(payload: ApiErrorPayload) {
     super(payload.message);
     this.code = payload.code;
@@ -24,8 +33,16 @@ type FetchFn = typeof fetch;
 
 type RequestOptions = RequestInit & { timeout?: number };
 
+/**
+ * Таймаут по умолчанию для запросов (10 секунд).
+ */
 const DEFAULT_TIMEOUT = 10_000;
 
+/**
+ * Приводит тело ответа с ошибкой к экземпляру `ApiError`.
+ * @param status HTTP-статус ответа.
+ * @param body Распарсенное тело ответа.
+ */
 function normalizeError(status: number, body: unknown): ApiError {
   if (body && typeof body === 'object') {
     const maybeCode = 'code' in body ? String((body as Record<string, unknown>).code) : 'UNKNOWN';
@@ -37,6 +54,12 @@ function normalizeError(status: number, body: unknown): ApiError {
   return new ApiError({ code: 'UNKNOWN', message: 'Неизвестная ошибка', status });
 }
 
+/**
+ * Создаёт функцию для выполнения API-запросов с учётом базового URL и таймаутов.
+ * @param fetchFn Реализация функции `fetch`, которую нужно использовать.
+ * @param options Дополнительные параметры: базовый URL и значение таймаута.
+ * @returns Асинхронную функцию запроса, автоматически обрабатывающую ошибки и таймауты.
+ */
 export function createApiClient(fetchFn: FetchFn, options?: CreateApiClientOptions) {
   const baseUrl =
       options?.baseUrl ??
@@ -90,4 +113,7 @@ export function createApiClient(fetchFn: FetchFn, options?: CreateApiClientOptio
   };
 }
 
+/**
+ * Клиент API, использующий глобальный `fetch` браузера.
+ */
 export const apiClient = createApiClient(fetch);

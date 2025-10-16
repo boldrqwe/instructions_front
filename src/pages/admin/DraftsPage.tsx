@@ -10,6 +10,9 @@ import styles from './DraftsPage.module.css';
 
 const PAGE_SIZE = 50;
 
+/**
+ * Административная страница управления черновиками статей.
+ */
 export function DraftsPage() {
   const { authHeader } = useAuth();
   const [articles, setArticles] = useState<Article[]>([]);
@@ -23,6 +26,9 @@ export function DraftsPage() {
     return () => window.clearTimeout(timer);
   }, [query]);
 
+  /**
+   * Возвращает функцию загрузки черновиков с учётом фильтра и авторизации.
+   */
   const loadDrafts = useMemo(() => {
     if (!authHeader) return () => Promise.resolve();
     return async () => {
@@ -51,6 +57,9 @@ export function DraftsPage() {
     void loadDrafts();
   }, [loadDrafts]);
 
+  /**
+   * Переключает статус публикации статьи и обновляет список без повторного запроса.
+   */
   async function togglePublish(id: string, action: 'publish' | 'unpublish') {
     if (!authHeader) return;
     try {

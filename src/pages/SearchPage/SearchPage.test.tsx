@@ -15,6 +15,9 @@ describe('SearchPage', () => {
     vi.clearAllMocks();
   });
 
+  /**
+   * Проверяет, что список результатов корректно отображается при успешном ответе API.
+   */
   test('renders search results correctly', async () => {
     const mockData: Page<SearchResult> = {
       items: [
@@ -73,6 +76,9 @@ describe('SearchPage', () => {
     expect(await screen.findByText('Тонкости соусов')).toBeVisible();
   });
 
+  /**
+   * Убеждаемся, что при отсутствии результатов выводится соответствующее сообщение.
+   */
   test('handles empty results', async () => {
     vi.mocked(useSearchQuery).mockReturnValue({
       data: { items: [], total: 0, page: 1, size: 10 },
@@ -92,6 +98,9 @@ describe('SearchPage', () => {
     expect(await screen.findByText(/ничего не найдено/i)).toBeVisible();
   });
 
+  /**
+   * Проверяем отображение состояния ошибки.
+   */
   test('handles error state', async () => {
     vi.mocked(useSearchQuery).mockReturnValue({
       data: undefined,

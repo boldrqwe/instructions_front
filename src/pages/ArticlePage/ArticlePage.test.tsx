@@ -70,6 +70,9 @@ describe('ArticlePage', () => {
     vi.clearAllMocks();
   });
 
+  /**
+   * Проверяем переход по клику в оглавлении и подсветку активного раздела.
+   */
   test('navigates to section via TOC click and marks it active', async () => {
     const user = userEvent.setup();
 
@@ -108,6 +111,9 @@ describe('ArticlePage', () => {
     await waitFor(() => expect(tocButton).toHaveAttribute('aria-current', 'location'));
   });
 
+  /**
+   * Убеждаемся, что при переходе по хэшу выполняется прокрутка к нужному разделу.
+   */
   test('scrolls to deep link anchor on initial load', async () => {
     render(
       <MemoryRouter initialEntries={['/articles/test#финальный-шаг']}>
@@ -124,6 +130,9 @@ describe('ArticlePage', () => {
     );
   });
 
+  /**
+   * При ошибке 404 отображается страница «Не найдено».
+   */
   test('renders not found page for missing article', async () => {
     vi.mocked(useArticleQuery).mockReturnValue({
       data: undefined,
