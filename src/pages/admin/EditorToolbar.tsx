@@ -9,6 +9,12 @@ type Btn = {
     isActive: () => boolean | undefined;
 };
 
+/**
+ * Панель инструментов редактора Tiptap с основными действиями форматирования и вставки.
+ *
+ * @param editor Экземпляр редактора; при отсутствии панель скрывается.
+ * @returns Набор кнопок форматирования или `null`, если редактор не готов.
+ */
 export function EditorToolbar({ editor }: { editor: Editor | null }) {
     if (!editor) return null;
 
