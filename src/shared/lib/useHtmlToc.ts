@@ -41,13 +41,35 @@ export function useHtmlToc(html: string): TocItem[] {
             container.querySelectorAll('h1, h2, h3, h4, h5, h6')
         ) as HTMLElement[];
 
-        return headings.map((el) => ({
-            id:
-                el.id ||
-                el.textContent?.trim().toLowerCase().replace(/\s+/g, '-') ||
-                '',
-            text: el.textContent || '',
-            level: Number(el.tagName.slice(1)), // h2 → 2
-        }));
+        if (headings.length > 0) {
+            return headings.map((el) => ({
+                id:
+                    el.id ||
+                    el.textContent?.trim().toLowerCase().replace(/\s+/g, '-') ||
+                    '',
+                text: el.textContent || '',
+                level: Number(el.tagName.slice(1)), // h2 → 2
+            }));
+        }
+
+        const markdownHeadings: TocItem[] = [];
+        const regexp = /^(#{1,6})\s+(.+)$/gm;
+        let match: RegExpExecArray | null;
+
+        while ((match = regexp.exec(html)) !== null) {
+            const level = match[1]?.length ?? 1;
+            const text = match[2]?.trim() ?? '';
+            if (!text) continue;
+
+            const id = text
+                .toLowerCase()
+                .replace(/[^\p{L}\p{N}\s-]+/gu, '')
+                .trim()
+                .replace(/\s+/g, '-');
+
+            markdownHeadings.push({ id, text, level });
+        }
+
+        return markdownHeadings;
     }, [html]);
 }

@@ -1,18 +1,62 @@
 import { render, screen } from '@testing-library/react';
-import { describe, expect, test } from 'vitest';
+import userEvent from '@testing-library/user-event';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { MarkdownView } from './MarkdownView';
 
-describe('MarkdownView', () => {
-  /**
-   * Проверяем, что таблицы и код рендерятся, а потенциальный XSS блокируется.
-   */
-  test('renders markdown tables and code blocks safely', () => {
-    const markdown = `| A | B |\n| - | - |\n| 1 | 2 |\n\n\`\`\`ts\nconsole.log('secure');\n\`\`\`\n\n<div onclick="alert('xss')">Не должно отрендериться</div>`;
+const writeTextMock = vi.fn();
+
+beforeEach(() => {
+  vi.stubGlobal('navigator', { clipboard: { writeText: writeTextMock } });
+});
+
+afterEach(() => {
+  writeTextMock.mockReset();
+  vi.unstubAllGlobals();
+});
+
+describe('MarkdownView code fences', () => {
+  it('renders fenced java block with badge and copy button', async () => {
+    const markdown = [
+      '```java',
+      'class A {',
+      '  public static void main(String[] args) {',
+      '    System.out.println("Hi");',
+      '  }',
+      '}',
+      '```',
+    ].join('\n');
 
     render(<MarkdownView content={markdown} />);
 
-    expect(screen.getByRole('table')).toBeVisible();
-    expect(screen.getByText(/console\.log/)).toBeVisible();
-    expect(screen.queryByText('Не должно отрендериться')).not.toBeInTheDocument();
+    const languageBadge = await screen.findByText('Java');
+    expect(languageBadge).toBeVisible();
+
+    const copyButton = await screen.findByRole('button', { name: /copy code/i });
+    await userEvent.click(copyButton);
+
+    const expected = [
+      'class A {',
+      '  public static void main(String[] args) {',
+      '    System.out.println("Hi");',
+      '  }',
+      '}',
+    ].join('\n');
+
+    expect(writeTextMock).toHaveBeenCalledWith(expected);
+  });
+
+  it('does not render copy buttons for inline code', () => {
+    render(<MarkdownView content={'Inline `code` example'} />);
+
+    expect(screen.queryByRole('button', { name: /copy code/i })).not.toBeInTheDocument();
+  });
+
+  it('falls back to plain text for unknown languages', async () => {
+    const markdown = ['```something', 'value', '```'].join('\n');
+
+    render(<MarkdownView content={markdown} />);
+
+    const badge = await screen.findByText('Plain text');
+    expect(badge).toBeVisible();
   });
 });

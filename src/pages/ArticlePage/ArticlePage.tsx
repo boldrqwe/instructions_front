@@ -110,20 +110,42 @@ export function ArticlePage() {
   );
 
   /** Реальные DOM-элементы заголовков внутри контента — для наблюдения. */
-  const headingElements = useMemo<HTMLElement[]>(() => {
-    if (!contentRef.current || tocFlat.length === 0) return [];
-    const root = contentRef.current;
-    const esc = (s: string) =>
-        (window.CSS && 'escape' in window.CSS ? (window.CSS as any).escape(s) : s);
+  const [headingElements, setHeadingElements] = useState<HTMLElement[]>([]);
 
-    return tocFlat
-        .map((h) => root.querySelector<HTMLElement>(`#${esc(h.id)}`))
+  useEffect(() => {
+    const root = contentRef.current;
+    if (!root || tocFlat.length === 0) {
+      setHeadingElements([]);
+      return;
+    }
+
+    const esc = (s: string) =>
+      (window.CSS && 'escape' in window.CSS ? (window.CSS as any).escape(s) : s);
+
+    const collect = () => {
+      const nodes = tocFlat
+        .map((h) => {
+          const direct = root.querySelector<HTMLElement>(`#${esc(h.id)}`);
+          if (direct) return direct;
+          return root.querySelector<HTMLElement>(`#${esc(`user-content-${h.id}`)}`);
+        })
         .filter(isHTMLElement);
+      setHeadingElements(nodes);
+    };
+
+    collect();
+
+    const observer = new MutationObserver(() => collect());
+    observer.observe(root, { childList: true, subtree: true });
+
+    return () => observer.disconnect();
   }, [tocFlat, article?.body]);
 
   /** Подсветка активной секции при скролле. */
   useEffect(() => {
     if (headingElements.length === 0) return;
+
+    const normalize = (value: string) => value.replace(/^user-content-/, '');
 
     const observer = new IntersectionObserver(
         (entries) => {
@@ -132,7 +154,7 @@ export function ArticlePage() {
               .sort((a, b) => b.intersectionRatio - a.intersectionRatio);
 
           if (visible.length > 0) {
-            setActiveSectionId((visible[0].target as HTMLElement).id);
+            setActiveSectionId(normalize((visible[0].target as HTMLElement).id));
             return;
           }
 
@@ -141,7 +163,7 @@ export function ArticlePage() {
               .sort((a, b) => b.boundingClientRect.top - a.boundingClientRect.top);
 
           if (firstAbove.length > 0) {
-            setActiveSectionId((firstAbove[0].target as HTMLElement).id);
+            setActiveSectionId(normalize((firstAbove[0].target as HTMLElement).id));
           }
         },
         {
