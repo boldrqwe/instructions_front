@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
-import { useSearchQuery } from '../../entities/article/api/queries';
+import { useArticlesQuery } from '../../entities/article/api/queries';
 import { clampSnippet } from '../../shared/lib/clampSnippet';
 import { debounce } from '../../shared/lib/debounce';
 import styles from './SearchPage.module.css';
@@ -45,17 +45,31 @@ export function SearchPage() {
     return () => debouncedUpdate.cancel();
   }, [inputValue, debouncedUpdate]);
 
+  const trimmedQuery = debouncedQuery.trim();
+
   const searchParamsObject = useMemo(
-    () => ({ query: debouncedQuery, page: pageParam, size: PAGE_SIZE }),
-    [debouncedQuery, pageParam],
+    () => ({ query: trimmedQuery, page: pageParam, size: PAGE_SIZE }),
+    [trimmedQuery, pageParam],
   );
 
-  const { data, isFetching, isError, error } = useSearchQuery(
-    searchParamsObject,
-    debouncedQuery.trim().length > 0,
-  );
+  const {
+    data,
+    isFetching,
+    isError,
+    error,
+  } = useArticlesQuery(searchParamsObject, {
+    endpoint: '/articles/list',
+    enabled: trimmedQuery.length > 0,
+  });
 
-  const totalPages = data ? Math.ceil(data.total / PAGE_SIZE) : 0;
+  const items = data?.content ?? [];
+  const totalElements =
+    typeof data?.totalElements === 'number'
+      ? data.totalElements
+      : typeof data?.total === 'number'
+        ? data.total
+        : items.length;
+  const totalPages = totalElements > 0 ? Math.ceil(totalElements / PAGE_SIZE) : 0;
 
   return (
     <section className={styles.root} aria-labelledby="search-title">
@@ -86,7 +100,7 @@ export function SearchPage() {
         </label>
       </form>
 
-      {debouncedQuery.trim().length === 0 ? (
+      {trimmedQuery.length === 0 ? (
         <p className={styles.state}>Введите запрос, чтобы увидеть результаты.</p>
       ) : (
         <div className={styles.results}>
@@ -98,29 +112,22 @@ export function SearchPage() {
             </p>
           )}
 
-          {data && data.items.length === 0 && !isFetching && !isError && (
+          {items.length === 0 && !isFetching && !isError && (
             <p className={styles.state}>Ничего не найдено. Попробуйте другой запрос.</p>
           )}
 
           <ul className={styles.list}>
-            {data?.items.map((item) => {
-              const link =
-                item.type === 'section' && item.sectionAnchor
-                  ? `/articles/${item.slug}#${item.sectionAnchor}`
-                  : `/articles/${item.slug}`;
-
-              return (
-                <li key={`${item.type}-${item.id}`} className={styles.card}>
-                  <Link to={link} className={styles.link}>
-                    <span className={styles.badge} data-type={item.type}>
-                      {item.type === 'section' ? 'Секция' : 'Статья'}
-                    </span>
-                    <h2 className={styles.cardTitle}>{item.title}</h2>
-                    <p className={styles.snippet}>{clampSnippet(item.snippet, 200)}</p>
-                  </Link>
-                </li>
-              );
-            })}
+            {items.map(item => (
+              <li key={item.id ?? item.slug} className={styles.card}>
+                <Link to={`/articles/${item.slug}`} className={styles.link}>
+                  <span className={styles.badge} data-type="article">
+                    Статья
+                  </span>
+                  <h2 className={styles.cardTitle}>{item.title}</h2>
+                  <p className={styles.snippet}>{clampSnippet(item.description ?? '', 200)}</p>
+                </Link>
+              </li>
+            ))}
           </ul>
 
           {totalPages > 1 && (

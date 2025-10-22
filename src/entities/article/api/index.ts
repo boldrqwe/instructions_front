@@ -18,11 +18,18 @@ export interface ListArticlesParams {
   readonly size?: number;
 }
 
+export interface ListArticlesOptions {
+  readonly endpoint?: '/articles' | '/articles/list';
+}
+
 /**
  * Загружает список статей с сервера с учётом фильтров и пагинации.
  * @param params Параметры фильтрации и пагинации.
  */
-export async function listArticles(params: ListArticlesParams = {}) {
+export async function listArticles(
+  params: ListArticlesParams = {},
+  options: ListArticlesOptions = {},
+) {
   const searchParams = new URLSearchParams();
   if (params.status) {
     searchParams.set('status', params.status);
@@ -38,7 +45,8 @@ export async function listArticles(params: ListArticlesParams = {}) {
   }
   const query = searchParams.toString();
   const suffix = query ? `?${query}` : '';
-  return apiClient<Page<ArticleSummary>>(`/articles${suffix}`);
+  const basePath = options.endpoint ?? '/articles';
+  return apiClient<Page<ArticleSummary>>(`${basePath}${suffix}`);
 }
 
 /**

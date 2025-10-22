@@ -43,6 +43,7 @@ export function DraftsPage() {
             size: PAGE_SIZE,
           },
           authHeader,
+          { endpoint: '/articles/list' },
         );
         setArticles(response.items);
       } catch (err) {

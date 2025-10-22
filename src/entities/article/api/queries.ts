@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import type { ListArticlesParams, SearchParams } from './index';
+import type { ListArticlesOptions, ListArticlesParams, SearchParams } from './index';
 import { getArticleBySlug, getToc, listArticles, search } from './index';
 import type { Article, SearchResult, Toc } from '../model/types';
 
@@ -25,15 +25,25 @@ interface FrontendPage<T> {
 }
 
 /** ======================= Список статей ======================= */
+interface UseArticlesQueryOptions extends ListArticlesOptions {
+  readonly enabled?: boolean;
+}
+
 /**
  * Получает список статей с параметрами пагинации через React Query.
  * @param params Параметры запроса к API.
+ * @param options Дополнительные настройки (например, альтернативный эндпоинт или включение запроса).
  */
-export function useArticlesQuery(params: ListArticlesParams) {
+export function useArticlesQuery(
+  params: ListArticlesParams,
+  options: UseArticlesQueryOptions = {},
+) {
+  const { endpoint, enabled = true } = options;
   return useQuery({
-    queryKey: ['articles', params] as const,
-    queryFn: () => listArticles(params),
+    queryKey: ['articles', params, endpoint] as const,
+    queryFn: () => listArticles(params, { endpoint }),
     staleTime: 5 * 60_000,
+    enabled,
   });
 }
 

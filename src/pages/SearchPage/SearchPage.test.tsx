@@ -2,13 +2,14 @@ import { render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 import { SearchPage } from './SearchPage';
-import type { Page, SearchResult } from '../../entities/search/model/types';
+import type { Page } from '../../entities/article/model/types';
+import type { ArticleSummary } from '../../entities/article/model/types';
 
 vi.mock('../../entities/article/api/queries', () => ({
-  useSearchQuery: vi.fn(),
+  useArticlesQuery: vi.fn(),
 }));
 
-const { useSearchQuery } = await import('../../entities/article/api/queries');
+const { useArticlesQuery } = await import('../../entities/article/api/queries');
 
 describe('SearchPage', () => {
   beforeEach(() => {
@@ -19,33 +20,31 @@ describe('SearchPage', () => {
    * Проверяет, что список результатов корректно отображается при успешном ответе API.
    */
   test('renders search results correctly', async () => {
-    const mockData: Page<SearchResult> = {
-      items: [
+    const mockData: Page<ArticleSummary> = {
+      content: [
         {
           id: '1',
-          type: 'article',
+          slug: 'kak-varit-pastu',
           title: 'Как варить пасту',
-          snippet: 'Подробное руководство',
-          articleId: 'a1',
-          articleSlug: 'kak-varit-pastu',
+          description: 'Подробное руководство',
+          status: 'PUBLISHED',
+          updatedAt: new Date().toISOString(),
         },
         {
           id: '2',
-          type: 'section',
+          slug: 'sousy-dlya-pasty',
           title: 'Тонкости соусов',
-          snippet: 'Советы по приготовлению',
-          articleId: 'a1',
-          articleSlug: 'kak-varit-pastu',
-          sectionId: 's1',
-          sectionAnchor: 'sousy',
+          description: 'Советы по приготовлению',
+          status: 'PUBLISHED',
+          updatedAt: new Date().toISOString(),
         },
       ],
       total: 2,
-      page: 1,
+      page: 0,
       size: 10,
     };
 
-    vi.mocked(useSearchQuery).mockReturnValue({
+    vi.mocked(useArticlesQuery).mockReturnValue({
       data: mockData,
       error: null,
       isError: false,
@@ -80,8 +79,8 @@ describe('SearchPage', () => {
    * Убеждаемся, что при отсутствии результатов выводится соответствующее сообщение.
    */
   test('handles empty results', async () => {
-    vi.mocked(useSearchQuery).mockReturnValue({
-      data: { items: [], total: 0, page: 1, size: 10 },
+    vi.mocked(useArticlesQuery).mockReturnValue({
+      data: { content: [], total: 0, page: 0, size: 10 },
       isError: false,
       isLoading: false,
       error: null,
@@ -102,7 +101,7 @@ describe('SearchPage', () => {
    * Проверяем отображение состояния ошибки.
    */
   test('handles error state', async () => {
-    vi.mocked(useSearchQuery).mockReturnValue({
+    vi.mocked(useArticlesQuery).mockReturnValue({
       data: undefined,
       isError: true,
       isLoading: false,

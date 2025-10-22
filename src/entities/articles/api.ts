@@ -69,9 +69,14 @@ async function apiRequest<T>(path: string, options: RequestOptions = {}): Promis
  * @param query Параметры фильтрации и пагинации.
  * @param authHeader Заголовок авторизации администратора.
  */
+interface FetchArticlesOptions {
+  readonly endpoint?: '/articles' | '/articles/list';
+}
+
 export async function fetchArticles(
   query: ArticleQuery,
   authHeader: string,
+  options: FetchArticlesOptions = {},
 ): Promise<ArticleListResponse> {
   const params = new URLSearchParams();
   if (query.status) params.set('status', query.status);
@@ -80,7 +85,8 @@ export async function fetchArticles(
   if (typeof query.size === 'number') params.set('size', String(query.size));
 
   const search = params.toString();
-  const path = search ? `/articles?${search}` : '/articles';
+  const basePath = options.endpoint ?? '/articles';
+  const path = search ? `${basePath}?${search}` : basePath;
   return apiRequest<ArticleListResponse>(path, { authHeader });
 }
 
