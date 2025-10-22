@@ -48,36 +48,58 @@ export function HomePage() {
     );
   }
 
+  const articles = data.content;
+
   // --- Основной рендер ---
   return (
     <section className={styles.root} aria-labelledby="home-title">
-      <header className={styles.hero}>
-        <h1 id="home-title" className={styles.title}>
-          База знаний длинных инструкций
-        </h1>
-        <p className={styles.subtitle}>
-          Находите статьи, переходите к ужным секциям и изучайте инструкции в удобном формате.
-        </p>
-      </header>
+      <aside className={styles.sidebar} aria-label="Навигация по опубликованным статьям">
+        <h2 className={styles.sidebarTitle}>Все статьи</h2>
+        <nav>
+          <ul className={styles.sidebarList}>
+            {articles.map((article) => (
+              <li key={`nav-${article.id ?? article.slug ?? article.title}`} className={styles.sidebarItem}>
+                <Link to={`/articles/${article.slug}`} className={styles.sidebarLink}>
+                  {article.title}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </nav>
+      </aside>
 
-      <ul className={styles.list}>
-        {data.content.map((article) => (
-          <li key={article.id ?? article.slug ?? Math.random()} className={styles.card}>
-            <Link to={`/articles/${article.slug}`} className={styles.link}>
-              <h2 className={styles.cardTitle}>{article.title}</h2>
-              <p className={styles.cardDescription}>
-                {clampSnippet(article.description ?? '', 160)}
-              </p>
-              <span className={styles.meta}>
-                Обновлено{' '}
-                {article.updatedAt
-                  ? new Date(article.updatedAt).toLocaleDateString('ru-RU')
-                  : '—'}
-              </span>
-            </Link>
-          </li>
-        ))}
-      </ul>
+      <div className={styles.contentArea}>
+        <header className={styles.hero}>
+          <span className={styles.eyebrow}>Справочник</span>
+          <h1 id="home-title" className={styles.title}>
+            База знаний длинных инструкций
+          </h1>
+          <p className={styles.subtitle}>
+            Изучайте подробные руководства в формате, напоминающем документацию: структурированно, с понятной навигацией и быстрым доступом к нужным материалам.
+          </p>
+        </header>
+
+        <ul className={styles.list}>
+          {articles.map((article) => (
+            <li key={article.id ?? article.slug ?? article.title} className={styles.card}>
+              <Link to={`/articles/${article.slug}`} className={styles.link}>
+                <div>
+                  <h2 className={styles.cardTitle}>{article.title}</h2>
+                  <p className={styles.cardDescription}>
+                    {clampSnippet(article.description ?? '', 180)}
+                  </p>
+                </div>
+                <span className={styles.meta}>
+                  Обновлено{' '}
+                  {article.updatedAt
+                    ? new Date(article.updatedAt).toLocaleDateString('ru-RU')
+                    : '—'}
+                </span>
+              </Link>
+            </li>
+          ))}
+        </ul>
+      </div>
     </section>
   );
 }
