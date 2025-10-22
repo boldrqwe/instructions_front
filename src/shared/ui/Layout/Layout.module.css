@@ -40,9 +40,8 @@
   flex-wrap: wrap;
   gap: 0.75rem;
   align-items: center;
-  justify-content: center;
-  width: 100%;
-  max-width: 1100px;
+  justify-content: flex-start;
+  width: min(1360px, 100%);
 }
 
 .actions {
@@ -114,7 +113,7 @@
   flex: 1;
   padding: clamp(2rem, 4vw, 3rem);
   margin: 0 auto;
-  width: min(1240px, 100%);
+  width: min(1360px, 100%);
 }
 
 @media (max-width: 768px) {
