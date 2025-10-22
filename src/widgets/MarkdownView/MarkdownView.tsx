@@ -1,4 +1,4 @@
-import { cloneElement, isValidElement } from 'react';
+import { cloneElement, isValidElement, useEffect, useRef, useState } from 'react';
 import type { Components } from 'react-markdown';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
@@ -49,8 +49,28 @@ const components: Components = {
         );
     },
     pre({ children, node: _node, ...props }) {
+        const [copyStatus, setCopyStatus] = useState<'idle' | 'copied' | 'error'>('idle');
+        const resetTimerRef = useRef<number | null>(null);
         const childArray = Array.isArray(children) ? children : [children];
         const firstChild = childArray[0];
+
+        useEffect(() => {
+            return () => {
+                if (resetTimerRef.current) {
+                    window.clearTimeout(resetTimerRef.current);
+                }
+            };
+        }, []);
+
+        const scheduleReset = () => {
+            if (resetTimerRef.current) {
+                window.clearTimeout(resetTimerRef.current);
+            }
+
+            resetTimerRef.current = window.setTimeout(() => {
+                setCopyStatus('idle');
+            }, 2000);
+        };
 
         if (isValidElement(firstChild)) {
             const className: string | undefined = firstChild.props.className;
@@ -62,8 +82,52 @@ const components: Components = {
                     ? rawCode.replace(/\n$/, '')
                     : String(rawCode).replace(/\n$/, '');
 
+            const handleCopy = async () => {
+                if (!codeContent) {
+                    return;
+                }
+
+                try {
+                    if (navigator?.clipboard?.writeText) {
+                        await navigator.clipboard.writeText(codeContent);
+                    } else {
+                        const textarea = document.createElement('textarea');
+                        textarea.value = codeContent;
+                        textarea.setAttribute('readonly', '');
+                        textarea.style.position = 'absolute';
+                        textarea.style.left = '-9999px';
+                        document.body.appendChild(textarea);
+                        textarea.select();
+                        document.execCommand('copy');
+                        document.body.removeChild(textarea);
+                    }
+
+                    setCopyStatus('copied');
+                } catch (error) {
+                    console.error('Failed to copy code', error);
+                    setCopyStatus('error');
+                } finally {
+                    scheduleReset();
+                }
+            };
+
+            const copyLabel =
+                copyStatus === 'copied'
+                    ? 'Скопировано!'
+                    : copyStatus === 'error'
+                        ? 'Ошибка'
+                        : 'Скопировать';
+
             return (
                 <pre data-language={language} {...props}>
+                    <button
+                        type="button"
+                        className={styles.copyButton}
+                        onClick={handleCopy}
+                        aria-live="polite"
+                    >
+                        {copyLabel}
+                    </button>
                     {cloneElement(firstChild, {
                         'data-language': language,
                         children: codeContent,
