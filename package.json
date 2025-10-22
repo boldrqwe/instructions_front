@@ -26,6 +26,7 @@
     "@tiptap/extension-underline": "^3.6.5",
     "@tiptap/react": "^3.6.5",
     "@tiptap/starter-kit": "^3.6.5",
+    "github-slugger": "^2.0.0",
     "hast-util-sanitize": "^5.0.2",
     "lowlight": "^3.3.0",
     "react": "^18.3.1",
