@@ -60,11 +60,52 @@
   box-shadow: inset 0 0 0 1px rgba(107, 139, 255, 0.25);
 }
 
+.copyButton {
+  position: absolute;
+  top: 0.7rem;
+  right: 1rem;
+  padding: 0.35rem 0.75rem;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  border: none;
+  border-radius: 999px;
+  cursor: pointer;
+  color: rgba(10, 21, 46, 0.9);
+  background: rgba(255, 255, 255, 0.85);
+  box-shadow: 0 0 0 1px rgba(15, 42, 88, 0.12);
+  transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+}
+
+.copyButton:hover,
+.copyButton:focus-visible {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(9, 20, 44, 0.22);
+  background: rgba(255, 255, 255, 0.95);
+}
+
+.copyButton:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 6px rgba(9, 20, 44, 0.25);
+}
+
+[data-theme='dark'] .copyButton {
+  color: #f3f5ff;
+  background: rgba(28, 42, 86, 0.85);
+  box-shadow: 0 0 0 1px rgba(107, 139, 255, 0.4);
+}
+
+[data-theme='dark'] .copyButton:hover,
+[data-theme='dark'] .copyButton:focus-visible {
+  background: rgba(40, 60, 112, 0.92);
+}
+
 .root pre[data-language]::before {
   content: attr(data-language);
   position: absolute;
   top: 0.6rem;
-  right: 1rem;
+  right: 4.1rem;
   padding: 0.2rem 0.55rem;
   font-size: 0.65rem;
   font-weight: 700;
