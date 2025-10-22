@@ -1,3 +1,5 @@
+import { cloneElement, isValidElement } from 'react';
+import type { Components } from 'react-markdown';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import rehypeRaw from 'rehype-raw';
@@ -5,23 +7,74 @@ import rehypeSlug from 'rehype-slug';
 import rehypeAutolinkHeadings from 'rehype-autolink-headings';
 import rehypeSanitize, { defaultSchema } from 'rehype-sanitize';
 
+import styles from './MarkdownView.module.css';
+
 /**
  * Безопасная схема для `rehype-sanitize`, разрешающая нужные HTML-теги.
  * Это защищает от XSS и оставляет нужные элементы (заголовки, таблицы, изображения и т.д.).
  */
+const baseTagNames = (defaultSchema.tagNames || []).filter((tag) => tag !== 'div');
+
 const schema = {
     ...defaultSchema,
     tagNames: [
-        ...(defaultSchema.tagNames || []),
+        ...baseTagNames,
         'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
-        'pre', 'code', 'table', 'thead', 'tbody', 'tr', 'th', 'td', 'img',
+        'pre', 'code', 'table', 'thead', 'tbody', 'tr', 'th', 'td', 'img', 'span',
     ],
     attributes: {
         ...(defaultSchema.attributes || {}),
         '*': [...(defaultSchema.attributes?.['*'] || []), 'id', 'className'],
         a:  [...(defaultSchema.attributes?.a || []), 'href', 'target', 'rel'],
         img:[...(defaultSchema.attributes?.img || []), 'src', 'alt', 'title'],
-        code:[...(defaultSchema.attributes?.code || []), 'className'],
+        pre:[...(defaultSchema.attributes?.pre || []), 'data-language'],
+        code:[...(defaultSchema.attributes?.code || []), 'className', 'data-language'],
+    },
+};
+
+const components: Components = {
+    code({ inline, className, children, node: _node, ...props }) {
+        if (inline) {
+            return (
+                <code className={className} {...props}>
+                    {children}
+                </code>
+            );
+        }
+
+        return (
+            <code className={className} {...props}>
+                {String(children).replace(/\n$/, '')}
+            </code>
+        );
+    },
+    pre({ children, node: _node, ...props }) {
+        const childArray = Array.isArray(children) ? children : [children];
+        const firstChild = childArray[0];
+
+        if (isValidElement(firstChild)) {
+            const className: string | undefined = firstChild.props.className;
+            const languageMatch = /language-([\w-]+)/.exec(className || '');
+            const language = languageMatch?.[1]?.toUpperCase();
+            const rawCode = firstChild.props.children;
+            const codeContent =
+                typeof rawCode === 'string'
+                    ? rawCode.replace(/\n$/, '')
+                    : String(rawCode).replace(/\n$/, '');
+
+            return (
+                <pre data-language={language} {...props}>
+                    {cloneElement(firstChild, {
+                        'data-language': language,
+                        children: codeContent,
+                    })}
+                </pre>
+            );
+        }
+
+        return (
+            <pre {...props}>{children}</pre>
+        );
     },
 };
 
@@ -43,16 +96,19 @@ const schema = {
  */
 export function MarkdownView({ content }: { content: string }) {
     return (
-        <ReactMarkdown
-            remarkPlugins={[remarkGfm]}
-            rehypePlugins={[
-                rehypeRaw,                         // Разрешает HTML внутри Markdown
-                rehypeSlug,                        // Проставляет id для заголовков
-                [rehypeAutolinkHeadings, { behavior: 'append' }], // Делает заголовки ссылками
-                [rehypeSanitize, schema],          // Безопасная очистка
-            ]}
-        >
-            {content}
-        </ReactMarkdown>
+        <div className={styles.root}>
+            <ReactMarkdown
+                remarkPlugins={[remarkGfm]}
+                rehypePlugins={[
+                    rehypeRaw,                         // Разрешает HTML внутри Markdown
+                    rehypeSlug,                        // Проставляет id для заголовков
+                    [rehypeAutolinkHeadings, { behavior: 'append' }], // Делает заголовки ссылками
+                    [rehypeSanitize, schema],          // Безопасная очистка
+                ]}
+                components={components}
+            >
+                {content}
+            </ReactMarkdown>
+        </div>
     );
 }

@@ -9,10 +9,12 @@ describe('MarkdownView', () => {
   test('renders markdown tables and code blocks safely', () => {
     const markdown = `| A | B |\n| - | - |\n| 1 | 2 |\n\n\`\`\`ts\nconsole.log('secure');\n\`\`\`\n\n<div onclick="alert('xss')">Не должно отрендериться</div>`;
 
-    render(<MarkdownView content={markdown} />);
+    const { container } = render(<MarkdownView content={markdown} />);
 
     expect(screen.getByRole('table')).toBeVisible();
-    expect(screen.getByText(/console\.log/)).toBeVisible();
-    expect(screen.queryByText('Не должно отрендериться')).not.toBeInTheDocument();
+    const codeElement = screen.getByText(/console\.log/);
+    expect(codeElement).toBeVisible();
+    expect(codeElement.closest('pre')).toHaveAttribute('data-language', 'TS');
+    expect(container.querySelector('[onclick]')).toBeNull();
   });
 });
