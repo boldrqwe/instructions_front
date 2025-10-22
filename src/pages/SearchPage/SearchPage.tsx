@@ -98,12 +98,12 @@ export function SearchPage() {
             </p>
           )}
 
-          {data && data.items.length === 0 && !isFetching && !isError && (
+          {data?.items?.length === 0 && !isFetching && !isError && (
             <p className={styles.state}>Ничего не найдено. Попробуйте другой запрос.</p>
           )}
 
           <ul className={styles.list}>
-            {data?.items.map((item) => {
+            {(data?.items ?? []).map((item) => {
               const link =
                 item.type === 'section' && item.sectionAnchor
                   ? `/articles/${item.slug}#${item.sectionAnchor}`
