@@ -1,5 +1,6 @@
 import { cloneElement, isValidElement, useEffect, useRef, useState } from 'react';
-import type { Components } from 'react-markdown';
+import type { ComponentPropsWithoutRef, ReactNode } from 'react';
+import type { Components, ExtraProps } from 'react-markdown';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import rehypeRaw from 'rehype-raw';
@@ -32,8 +33,21 @@ const schema = {
     },
 };
 
+type CodeProps = ComponentPropsWithoutRef<'code'> &
+    ExtraProps & {
+        inline?: boolean;
+    };
+
+type PreProps = ComponentPropsWithoutRef<'pre'> & ExtraProps;
+
+type CodeElementProps = {
+    className?: string;
+    children?: ReactNode;
+    'data-language'?: string;
+};
+
 const components: Components = {
-    code({ inline, className, children, node: _node, ...props }) {
+    code({ inline, className, children, node: _node, ...props }: CodeProps) {
         if (inline) {
             return (
                 <code className={className} {...props}>
@@ -48,7 +62,7 @@ const components: Components = {
             </code>
         );
     },
-    pre({ children, node: _node, ...props }) {
+    pre({ children, node: _node, ...props }: PreProps) {
         const [copyStatus, setCopyStatus] = useState<'idle' | 'copied' | 'error'>('idle');
         const resetTimerRef = useRef<number | null>(null);
         const childArray = Array.isArray(children) ? children : [children];
@@ -72,7 +86,7 @@ const components: Components = {
             }, 2000);
         };
 
-        if (isValidElement(firstChild)) {
+        if (isValidElement<CodeElementProps>(firstChild)) {
             const className: string | undefined = firstChild.props.className;
             const languageMatch = /language-([\w-]+)/.exec(className || '');
             const language = languageMatch?.[1]?.toUpperCase();
@@ -128,7 +142,7 @@ const components: Components = {
                     >
                         {copyLabel}
                     </button>
-                    {cloneElement(firstChild, {
+                    {cloneElement<CodeElementProps>(firstChild, {
                         'data-language': language,
                         children: codeContent,
                     })}
