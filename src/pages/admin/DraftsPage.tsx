@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { fetchArticles, publishArticle, unpublishArticle } from '../../entities/articles/api';
-import type { Article } from '../../entities/articles/types';
+import type { Article, ArticleListResponse } from '../../entities/articles/types';
 import { useAuth } from '../../shared/model/auth';
 import { Card } from '../../shared/ui/Card';
 import { Input } from '../../shared/ui/Input';
@@ -44,7 +44,8 @@ export function DraftsPage() {
           },
           authHeader,
         );
-        setArticles(response.items);
+        const items = (response as ArticleListResponse | null | undefined)?.items;
+        setArticles(Array.isArray(items) ? items : []);
       } catch (err) {
         setError((err as Error).message);
       } finally {
