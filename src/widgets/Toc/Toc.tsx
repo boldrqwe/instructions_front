@@ -77,6 +77,7 @@ export function Toc({
                                 href={`#${ch.id}`}
                                 className={`${styles.link} ${activeId === ch.id ? styles.active : ''}`}
                                 aria-current={activeId === ch.id ? 'location' : undefined}
+                                role="button"
                                 onClick={(e) => handleClick(e, ch.id)}
                             >
                                 {ch.title}
@@ -91,6 +92,7 @@ export function Toc({
                                                 href={`#${s.id}`}
                                                 className={`${styles.link} ${activeId === s.id ? styles.active : ''}`}
                                                 aria-current={activeId === s.id ? 'location' : undefined}
+                                                role="button"
                                                 onClick={(e) => handleClick(e, s.id)}
                                             >
                                                 {s.title}

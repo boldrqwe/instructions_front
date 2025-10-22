@@ -17,6 +17,10 @@ function isHTMLElement(el: unknown): el is HTMLElement {
   return el instanceof HTMLElement;
 }
 
+function normalizeId(id: string) {
+  return id.startsWith('user-content-') ? id.replace('user-content-', '') : id;
+}
+
 /**
  * UI-тип, который обычно ждёт твой <Toc />:
  * глава с набором секций. (Если у тебя в Toc другие имена полей —
@@ -110,16 +114,24 @@ export function ArticlePage() {
   );
 
   /** Реальные DOM-элементы заголовков внутри контента — для наблюдения. */
+  const contentRoot = contentRef.current;
+
   const headingElements = useMemo<HTMLElement[]>(() => {
-    if (!contentRef.current || tocFlat.length === 0) return [];
-    const root = contentRef.current;
+    if (!contentRoot || tocFlat.length === 0) return [];
+    const root = contentRoot;
     const esc = (s: string) =>
         (window.CSS && 'escape' in window.CSS ? (window.CSS as any).escape(s) : s);
 
     return tocFlat
-        .map((h) => root.querySelector<HTMLElement>(`#${esc(h.id)}`))
+        .map((h) => {
+          const id = esc(h.id);
+          const selectors = [`#${id}`, `#user-content-${id}`];
+          return selectors
+              .map((selector) => root.querySelector<HTMLElement>(selector))
+              .find(isHTMLElement);
+        })
         .filter(isHTMLElement);
-  }, [tocFlat, article?.body]);
+  }, [contentRoot, tocFlat, article?.body]);
 
   /** Подсветка активной секции при скролле. */
   useEffect(() => {
@@ -132,7 +144,8 @@ export function ArticlePage() {
               .sort((a, b) => b.intersectionRatio - a.intersectionRatio);
 
           if (visible.length > 0) {
-            setActiveSectionId((visible[0].target as HTMLElement).id);
+            const id = (visible[0].target as HTMLElement).id;
+            setActiveSectionId(normalizeId(id));
             return;
           }
 
@@ -141,7 +154,8 @@ export function ArticlePage() {
               .sort((a, b) => b.boundingClientRect.top - a.boundingClientRect.top);
 
           if (firstAbove.length > 0) {
-            setActiveSectionId((firstAbove[0].target as HTMLElement).id);
+            const id = (firstAbove[0].target as HTMLElement).id;
+            setActiveSectionId(normalizeId(id));
           }
         },
         {
@@ -164,7 +178,7 @@ export function ArticlePage() {
     const anchor = decodeURIComponent(location.hash.slice(1));
     const t = window.setTimeout(() => {
       scrollToAnchor(anchor, { smooth: false });
-      setActiveSectionId(anchor);
+      setActiveSectionId(normalizeId(anchor));
     }, 150);
     return () => window.clearTimeout(t);
   }, [location.hash, tocFlat]);
