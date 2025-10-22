@@ -1,5 +1,7 @@
 import { cloneElement, isValidElement, useEffect, useRef, useState } from 'react';
+import type { ComponentPropsWithoutRef, ReactNode } from 'react';
 import type { Components } from 'react-markdown';
+import type { CodeProps } from 'react-markdown/lib/ast-to-react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import rehypeRaw from 'rehype-raw';
@@ -32,8 +34,19 @@ const schema = {
     },
 };
 
+type PreProps = ComponentPropsWithoutRef<'pre'> & {
+    children?: ReactNode;
+    node?: unknown;
+};
+
+type CodeElementProps = {
+    className?: string;
+    children?: ReactNode;
+    'data-language'?: string;
+};
+
 const components: Components = {
-    code({ inline, className, children, node: _node, ...props }) {
+    code({ inline, className, children, node: _node, ...props }: CodeProps) {
         if (inline) {
             return (
                 <code className={className} {...props}>
@@ -48,7 +61,7 @@ const components: Components = {
             </code>
         );
     },
-    pre({ children, node: _node, ...props }) {
+    pre({ children, node: _node, ...props }: PreProps) {
         const [copyStatus, setCopyStatus] = useState<'idle' | 'copied' | 'error'>('idle');
         const resetTimerRef = useRef<number | null>(null);
         const childArray = Array.isArray(children) ? children : [children];
@@ -72,11 +85,11 @@ const components: Components = {
             }, 2000);
         };
 
-        if (isValidElement(firstChild)) {
-            const className: string | undefined = firstChild.props.className;
+        if (isValidElement<CodeElementProps>(firstChild)) {
+            const { className, children: rawChildren } = firstChild.props;
             const languageMatch = /language-([\w-]+)/.exec(className || '');
             const language = languageMatch?.[1]?.toUpperCase();
-            const rawCode = firstChild.props.children;
+            const rawCode = rawChildren;
             const codeContent =
                 typeof rawCode === 'string'
                     ? rawCode.replace(/\n$/, '')

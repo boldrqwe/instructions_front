@@ -27,7 +27,7 @@ describe('SearchPage', () => {
           title: 'Как варить пасту',
           snippet: 'Подробное руководство',
           articleId: 'a1',
-          articleSlug: 'kak-varit-pastu',
+          slug: 'kak-varit-pastu',
         },
         {
           id: '2',
@@ -35,7 +35,7 @@ describe('SearchPage', () => {
           title: 'Тонкости соусов',
           snippet: 'Советы по приготовлению',
           articleId: 'a1',
-          articleSlug: 'kak-varit-pastu',
+          slug: 'kak-varit-pastu',
           sectionId: 's1',
           sectionAnchor: 'sousy',
         },
