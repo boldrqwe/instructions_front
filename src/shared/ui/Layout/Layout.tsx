@@ -10,6 +10,11 @@ export function Layout({ children }: { children: React.ReactNode }) {
   const { isAdmin, logout } = useAuth();
   return (
     <div className={styles.root}>
+      <div className={styles.ambient} aria-hidden="true">
+        <span className={`${styles.glow} ${styles.glowOne}`} />
+        <span className={`${styles.glow} ${styles.glowTwo}`} />
+        <span className={styles.grid} />
+      </div>
       <header className={styles.header}>
         <nav className={styles.nav}>
           <NavLink
