@@ -44,7 +44,7 @@ export function DraftsPage() {
           },
           authHeader,
         );
-        setArticles(response.items);
+        setArticles(response?.items ?? []);
       } catch (err) {
         setError((err as Error).message);
       } finally {
