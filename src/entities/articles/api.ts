@@ -7,6 +7,38 @@ import type {
 } from './types';
 
 /**
+ * Ответ пагинированного списка статей в виде, который возвращает API.
+ * Поля могут отличаться в зависимости от реализации бэкенда, поэтому часть из них
+ * помечена как необязательная и используется для нормализации.
+ */
+interface RawArticleListResponse extends Partial<ArticleListResponse> {
+  readonly content?: Article[];
+  readonly number?: number;
+  readonly totalElements?: number;
+  readonly pageable?: {
+    readonly pageNumber?: number;
+    readonly pageSize?: number;
+  };
+}
+
+/**
+ * Приводит ответ API к унифицированной форме `ArticleListResponse`.
+ */
+function normalizeArticleListResponse(raw: RawArticleListResponse): ArticleListResponse {
+  const items = raw.items ?? raw.content ?? [];
+  const page = raw.page ?? raw.number ?? raw.pageable?.pageNumber ?? 0;
+  const size = raw.size ?? raw.pageable?.pageSize ?? items.length;
+  const total = raw.total ?? raw.totalElements ?? items.length;
+
+  return {
+    items,
+    page,
+    size,
+    total,
+  };
+}
+
+/**
  * Базовый URL для всех запросов к API; берётся из окружения либо локального значения по умолчанию.
  */
 const API_BASE_URL =
@@ -81,7 +113,8 @@ export async function fetchArticles(
 
   const search = params.toString();
   const path = search ? `/articles?${search}` : '/articles';
-  return apiRequest<ArticleListResponse>(path, { authHeader });
+  const response = await apiRequest<RawArticleListResponse>(path, { authHeader });
+  return normalizeArticleListResponse(response);
 }
 
 /**
