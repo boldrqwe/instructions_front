@@ -44,6 +44,12 @@ const DraftsPage = lazy(() =>
   import('../../pages/admin/DraftsPage').then(m => ({ default: m.DraftsPage }))
 );
 /**
+ * Ленивая загрузка страницы опубликованных статей для администрирования.
+ */
+const PublishedArticlesPage = lazy(() =>
+  import('../../pages/admin/PublishedArticlesPage').then(m => ({ default: m.PublishedArticlesPage }))
+);
+/**
  * Ленивый импорт редактора статей, чтобы не грузить тяжелые зависимости заранее.
  */
 const ArticleEditorPage = lazy(() =>
@@ -71,6 +77,14 @@ export function AppRouter() {
                 element={
                   <RequireAuth>
                     <DraftsPage />
+                  </RequireAuth>
+                }
+              />
+              <Route
+                path="/admin/articles/published"
+                element={
+                  <RequireAuth>
+                    <PublishedArticlesPage />
                   </RequireAuth>
                 }
               />

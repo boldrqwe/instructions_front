@@ -40,6 +40,14 @@ export function Layout({ children }: { children: React.ReactNode }) {
                 Черновики
               </NavLink>
               <NavLink
+                to="/admin/articles/published"
+                className={({ isActive }) =>
+                  isActive ? `${styles.link} ${styles.linkActive}` : styles.link
+                }
+              >
+                Опубликованные
+              </NavLink>
+              <NavLink
                 to="/admin/articles/new"
                 className={({ isActive }) =>
                   isActive ? `${styles.link} ${styles.linkActive}` : styles.link
