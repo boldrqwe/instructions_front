@@ -56,7 +56,7 @@ type CodePlaygroundNode = Element & {
     };
 };
 
-const components: Components = {
+const components = {
     p({ node, children, ...props }: ParagraphProps) {
         const paragraphNode = node as Element | undefined;
         const firstChild = paragraphNode?.children?.[0];
@@ -178,7 +178,7 @@ const components: Components = {
             <pre {...props}>{children}</pre>
         );
     },
-    codeplayground({ node }) {
+    codeplayground({ node }: { node?: CodePlaygroundNode }) {
         const playgroundNode = node as CodePlaygroundNode | undefined;
         const rawValue = playgroundNode?.properties?.['data-code'];
         const attributeValue = Array.isArray(rawValue) ? rawValue[0] : rawValue;
@@ -188,6 +188,8 @@ const components: Components = {
 
         return <CodePlayground code={decoded} />;
     },
+} satisfies Components & {
+    codeplayground: (props: { node?: CodePlaygroundNode }) => JSX.Element;
 };
 
 /**
