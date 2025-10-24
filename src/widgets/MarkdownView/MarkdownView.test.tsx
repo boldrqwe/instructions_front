@@ -17,4 +17,24 @@ describe('MarkdownView', () => {
     expect(codeElement.closest('pre')).toHaveAttribute('data-language', 'TS');
     expect(container.querySelector('[onclick]')).toBeNull();
   });
+
+  test('renders interactive CodePlayground examples', async () => {
+    const playground = `<CodePlayground code={\`
+function Greeting({ name }) {
+  return <h2>Привет, {name}!</h2>;
+}
+
+export default function App() {
+  return <Greeting name="React" />;
+}
+\`} />`;
+
+    render(<MarkdownView content={playground} />);
+
+    const previewHeading = await screen.findByRole('heading', { name: 'Привет, React!' });
+    expect(previewHeading).toBeVisible();
+
+    const editor = screen.getByLabelText('Редактор кода') as HTMLTextAreaElement;
+    expect(editor.value.trim().startsWith('function Greeting')).toBe(true);
+  });
 });

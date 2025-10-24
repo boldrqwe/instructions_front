@@ -1,4 +1,4 @@
-import { cloneElement, isValidElement, useEffect, useRef, useState } from 'react';
+import { cloneElement, isValidElement, useEffect, useMemo, useRef, useState } from 'react';
 import type { ComponentPropsWithoutRef, ReactNode } from 'react';
 import type { Components, ExtraProps } from 'react-markdown';
 import ReactMarkdown from 'react-markdown';
@@ -7,8 +7,10 @@ import rehypeRaw from 'rehype-raw';
 import rehypeSlug from 'rehype-slug';
 import rehypeAutolinkHeadings from 'rehype-autolink-headings';
 import rehypeSanitize, { defaultSchema } from 'rehype-sanitize';
+import type { Element, Text } from 'hast';
 
 import styles from './MarkdownView.module.css';
+import { CodePlayground } from '../CodePlayground/CodePlayground';
 
 /**
  * Безопасная схема для `rehype-sanitize`, разрешающая нужные HTML-теги.
@@ -21,7 +23,7 @@ const schema = {
     tagNames: [
         ...baseTagNames,
         'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
-        'pre', 'code', 'table', 'thead', 'tbody', 'tr', 'th', 'td', 'img', 'span',
+        'pre', 'code', 'table', 'thead', 'tbody', 'tr', 'th', 'td', 'img', 'span', 'codeplayground',
     ],
     attributes: {
         ...(defaultSchema.attributes || {}),
@@ -30,6 +32,7 @@ const schema = {
         img:[...(defaultSchema.attributes?.img || []), 'src', 'alt', 'title'],
         pre:[...(defaultSchema.attributes?.pre || []), 'data-language'],
         code:[...(defaultSchema.attributes?.code || []), 'className', 'data-language'],
+        codeplayground: ['data-code'],
     },
 };
 
@@ -39,6 +42,7 @@ type CodeProps = ComponentPropsWithoutRef<'code'> &
     };
 
 type PreProps = ComponentPropsWithoutRef<'pre'> & ExtraProps;
+type ParagraphProps = ComponentPropsWithoutRef<'p'> & ExtraProps;
 
 type CodeElementProps = {
     className?: string;
@@ -46,7 +50,27 @@ type CodeElementProps = {
     'data-language'?: string;
 };
 
+type CodePlaygroundNode = Element & {
+    properties: Element['properties'] & {
+        'data-code'?: string | string[];
+    };
+};
+
 const components: Components = {
+    p({ node, children, ...props }: ParagraphProps) {
+        const paragraphNode = node as Element | undefined;
+        const firstChild = paragraphNode?.children?.[0];
+
+        if (
+            paragraphNode?.children?.length === 1 &&
+            firstChild?.type === 'element' &&
+            firstChild.tagName === 'codeplayground'
+        ) {
+            return <>{children}</>;
+        }
+
+        return <p {...props}>{children}</p>;
+    },
     code({ inline, className, children, node: _node, ...props }: CodeProps) {
         if (inline) {
             return (
@@ -154,6 +178,16 @@ const components: Components = {
             <pre {...props}>{children}</pre>
         );
     },
+    codeplayground({ node }) {
+        const playgroundNode = node as CodePlaygroundNode | undefined;
+        const rawValue = playgroundNode?.properties?.['data-code'];
+        const attributeValue = Array.isArray(rawValue) ? rawValue[0] : rawValue;
+        const textValue = extractTextContent(playgroundNode);
+        const encoded = typeof attributeValue === 'string' && attributeValue.length > 0 ? attributeValue : textValue;
+        const decoded = encoded ? decodeURIComponent(encoded) : '';
+
+        return <CodePlayground code={decoded} />;
+    },
 };
 
 /**
@@ -173,6 +207,8 @@ const components: Components = {
  * ```
  */
 export function MarkdownView({ content }: { content: string }) {
+    const preparedContent = useMemo(() => preprocessPlaygrounds(content), [content]);
+
     return (
         <div className={styles.root}>
             <ReactMarkdown
@@ -185,8 +221,38 @@ export function MarkdownView({ content }: { content: string }) {
                 ]}
                 components={components}
             >
-                {content}
+                {preparedContent}
             </ReactMarkdown>
         </div>
     );
+}
+
+const playgroundPattern = /<CodePlayground\s+code={`([\s\S]*?)`}\s*\/>/g;
+
+function preprocessPlaygrounds(text: string): string {
+    return text.replace(playgroundPattern, (_match, rawCode: string) => {
+        const encoded = encodeURIComponent(rawCode);
+        const escaped = escapeHtml(encoded);
+        return `\n\n<codeplayground data-code="${encoded}">${escaped}</codeplayground>\n\n`;
+    });
+}
+
+function extractTextContent(node?: CodePlaygroundNode): string {
+    if (!node?.children) {
+        return '';
+    }
+
+    return node.children
+        .map((child) => (child.type === 'text' ? (child as Text).value : ''))
+        .join('')
+        .trim();
+}
+
+function escapeHtml(value: string): string {
+    return value
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
 }
