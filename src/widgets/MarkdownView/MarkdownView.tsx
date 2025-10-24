@@ -1,4 +1,4 @@
-import { cloneElement, isValidElement, useEffect, useRef, useState } from 'react';
+import { cloneElement, isValidElement, useEffect, useMemo, useRef, useState } from 'react';
 import type { ComponentPropsWithoutRef, ReactNode } from 'react';
 import type { Components, ExtraProps } from 'react-markdown';
 import ReactMarkdown from 'react-markdown';
@@ -9,6 +9,7 @@ import rehypeAutolinkHeadings from 'rehype-autolink-headings';
 import rehypeSanitize, { defaultSchema } from 'rehype-sanitize';
 
 import styles from './MarkdownView.module.css';
+import { CodePlayground } from '../CodePlayground/CodePlayground';
 
 /**
  * Безопасная схема для `rehype-sanitize`, разрешающая нужные HTML-теги.
@@ -32,6 +33,41 @@ const schema = {
         code:[...(defaultSchema.attributes?.code || []), 'className', 'data-language'],
     },
 };
+
+type MarkdownSegment =
+    | { type: 'markdown'; content: string }
+    | { type: 'playground'; code: string };
+
+function splitContent(content: string): MarkdownSegment[] {
+    if (!content) {
+        return [{ type: 'markdown', content: '' }];
+    }
+
+    const segments: MarkdownSegment[] = [];
+    let lastIndex = 0;
+    let match: RegExpExecArray | null;
+    const pattern = /<CodePlayground\s+code={`([\s\S]*?)`}\s*\/>/g;
+
+    while ((match = pattern.exec(content)) !== null) {
+        if (match.index > lastIndex) {
+            segments.push({ type: 'markdown', content: content.slice(lastIndex, match.index) });
+        }
+
+        const code = match[1] ?? '';
+        segments.push({ type: 'playground', code });
+        lastIndex = match.index + match[0].length;
+    }
+
+    if (lastIndex < content.length) {
+        segments.push({ type: 'markdown', content: content.slice(lastIndex) });
+    }
+
+    if (segments.length === 0) {
+        return [{ type: 'markdown', content }];
+    }
+
+    return segments;
+}
 
 type CodeProps = ComponentPropsWithoutRef<'code'> &
     ExtraProps & {
@@ -173,20 +209,33 @@ const components: Components = {
  * ```
  */
 export function MarkdownView({ content }: { content: string }) {
+    const segments = useMemo(() => splitContent(content), [content]);
+
     return (
         <div className={styles.root}>
-            <ReactMarkdown
-                remarkPlugins={[remarkGfm]}
-                rehypePlugins={[
-                    rehypeRaw,                         // Разрешает HTML внутри Markdown
-                    rehypeSlug,                        // Проставляет id для заголовков
-                    [rehypeAutolinkHeadings, { behavior: 'append' }], // Делает заголовки ссылками
-                    [rehypeSanitize, schema],          // Безопасная очистка
-                ]}
-                components={components}
-            >
-                {content}
-            </ReactMarkdown>
+            {segments.map((segment, index) => {
+                if (segment.type === 'playground') {
+                    return (
+                        <CodePlayground code={segment.code} key={`playground-${index}`} />
+                    );
+                }
+
+                return (
+                    <ReactMarkdown
+                        key={`markdown-${index}`}
+                        remarkPlugins={[remarkGfm]}
+                        rehypePlugins={[
+                            rehypeRaw,                         // Разрешает HTML внутри Markdown
+                            rehypeSlug,                        // Проставляет id для заголовков
+                            [rehypeAutolinkHeadings, { behavior: 'append' }], // Делает заголовки ссылками
+                            [rehypeSanitize, schema],          // Безопасная очистка
+                        ]}
+                        components={components}
+                    >
+                        {segment.content}
+                    </ReactMarkdown>
+                );
+            })}
         </div>
     );
 }

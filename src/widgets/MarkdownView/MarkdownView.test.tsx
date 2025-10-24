@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import { describe, expect, test } from 'vitest';
 import { MarkdownView } from './MarkdownView';
 
@@ -16,5 +16,17 @@ describe('MarkdownView', () => {
     expect(codeElement).toBeVisible();
     expect(codeElement.closest('pre')).toHaveAttribute('data-language', 'TS');
     expect(container.querySelector('[onclick]')).toBeNull();
+  });
+
+  test('renders CodePlayground blocks inside markdown', async () => {
+    const markdown = `Вводный текст\n\n<CodePlayground code={\`export default function Hello() {\n  return <div>Привет!</div>;\n}\`} />\n\nЗавершающий абзац.`;
+
+    render(<MarkdownView content={markdown} />);
+
+    expect(screen.getByText('Вводный текст')).toBeVisible();
+    await waitFor(() => {
+      expect(screen.getByText('Привет!')).toBeVisible();
+    });
+    expect(screen.getByText('Завершающий абзац.')).toBeVisible();
   });
 });
