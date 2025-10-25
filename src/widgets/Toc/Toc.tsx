@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import styles from './Toc.module.css';
 
 /**
@@ -52,13 +52,55 @@ export function Toc({
                     }: TocProps) {
     if (!items || items.length === 0) return null;
 
+    const panelRef = useRef<HTMLElement | null>(null);
+    const listRef = useRef<HTMLUListElement | null>(null);
+
     const handleClick = (e: React.MouseEvent, id: string) => {
         e.preventDefault();
         onNavigate(id);
     };
 
+    useEffect(() => {
+        if (!activeId || !panelRef.current || !listRef.current) return;
+        if (!isOpen) return;
+
+        const panel = panelRef.current;
+        const activeLink = Array.from(
+            listRef.current.querySelectorAll<HTMLElement>('[data-toc-id]'),
+        ).find((el) => el.dataset.tocId === activeId);
+
+        if (!activeLink) return;
+
+        const panelRect = panel.getBoundingClientRect();
+        const touchesTop = Math.round(panelRect.top) <= 0;
+        const touchesBottom = Math.round(panelRect.bottom) >= window.innerHeight;
+
+        if (touchesTop || touchesBottom) {
+            return;
+        }
+
+        const padding = 16;
+        const activeRect = activeLink.getBoundingClientRect();
+        const isAbove = activeRect.top < panelRect.top + padding;
+        const isBelow = activeRect.bottom > panelRect.bottom - padding;
+
+        if (!isAbove && !isBelow) return;
+
+        const relativeTop = activeRect.top - panelRect.top + panel.scrollTop;
+        const target = relativeTop - panel.clientHeight / 2 + activeLink.clientHeight / 2;
+
+        panel.scrollTo({
+            top: Math.max(0, target),
+            behavior: 'smooth',
+        });
+    }, [activeId, isOpen, items]);
+
     return (
-        <aside className={`${styles.toc} ${isOpen ? styles.open : ''}`} aria-label="Оглавление">
+        <aside
+            ref={panelRef}
+            className={[styles.toc, isOpen ? styles.open : ''].filter(Boolean).join(' ')}
+            aria-label="Оглавление"
+        >
             {/* Кнопка закрытия видна только если передан onClose (mobile) */}
             {onClose && (
                 <button type="button" className={styles.close} onClick={onClose}>
@@ -69,12 +111,13 @@ export function Toc({
             <nav className={styles.nav}>
                 <h2 className={styles.heading}>Оглавление</h2>
 
-                <ul className={styles.list}>
+                <ul ref={listRef} className={styles.list}>
                     {(items ?? []).map((ch) => (
                         <li key={ch.id} className={styles.chapter}>
                             {/* Ссылка на H2 */}
                             <a
                                 href={`#${ch.id}`}
+                                data-toc-id={ch.id}
                                 className={`${styles.link} ${activeId === ch.id ? styles.active : ''}`}
                                 aria-current={activeId === ch.id ? 'location' : undefined}
                                 role="button"
@@ -90,6 +133,7 @@ export function Toc({
                                         <li key={s.id}>
                                             <a
                                                 href={`#${s.id}`}
+                                                data-toc-id={s.id}
                                                 className={`${styles.link} ${activeId === s.id ? styles.active : ''}`}
                                                 aria-current={activeId === s.id ? 'location' : undefined}
                                                 role="button"
