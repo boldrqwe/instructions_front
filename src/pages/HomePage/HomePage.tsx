@@ -99,26 +99,26 @@ export function HomePage() {
 
       <div className={styles.contentArea}>
         <header className={styles.hero}>
-          <span className={styles.eyebrow}>Справочник</span>
+          <span className={styles.eyebrow}>Вдохновлено Spring</span>
           <h1 id="home-title" className={styles.title}>
-            База знаний длинных инструкций
+            Документация, которая делает инструкции современными
           </h1>
           <p className={styles.subtitle}>
-            Изучайте подробные руководства в формате, напоминающем документацию: структурированно, с понятной навигацией и быстрым доступом к нужным материалам.
+            Тщательно структурированные руководства, дружелюбная навигация и зелёный акцент, знакомый по весенней экосистеме. Быстрее находите решения и запускайте проекты увереннее.
           </p>
           <div className={styles.heroMeta}>
-            <span className={styles.heroBadge}>Всего {articles.length} статей</span>
+            <span className={styles.heroBadge}>Готово {articles.length} инструкций</span>
             {latestUpdateDate ? (
-              <span className={styles.heroUpdate}>Последнее обновление {latestUpdateDate}</span>
+              <span className={styles.heroUpdate}>Актуализировано {latestUpdateDate}</span>
             ) : null}
           </div>
           <div className={styles.heroActions}>
             <Link to="/search" className={styles.primaryButton}>
-              Найти инструкцию
+              Открыть каталог
             </Link>
             {featuredArticleSlug ? (
               <Link to={`/articles/${featuredArticleSlug}`} className={styles.secondaryLink}>
-                Читать свежую статью
+                Быстрый старт
               </Link>
             ) : null}
           </div>
