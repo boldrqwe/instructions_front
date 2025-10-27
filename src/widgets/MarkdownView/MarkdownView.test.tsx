@@ -12,9 +12,11 @@ describe('MarkdownView', () => {
     const { container } = render(<MarkdownView content={markdown} />);
 
     expect(screen.getByRole('table')).toBeVisible();
-    const codeElement = screen.getByText(/console\.log/);
-    expect(codeElement).toBeVisible();
-    expect(codeElement.closest('pre')).toHaveAttribute('data-language', 'TS');
+    const codeElement = container.querySelector('pre code');
+    expect(codeElement).toHaveClass('hljs');
+    expect(codeElement).toHaveTextContent("console.log('secure');");
+    expect(codeElement?.closest('pre')).toHaveAttribute('data-language', 'TS');
+    expect(codeElement?.querySelector('.hljs-string')).not.toBeNull();
     expect(container.querySelector('[onclick]')).toBeNull();
   });
 });

@@ -1,4 +1,4 @@
-import { cloneElement, isValidElement, useEffect, useRef, useState } from 'react';
+import { isValidElement, useEffect, useRef, useState } from 'react';
 import type { ComponentPropsWithoutRef, ReactNode } from 'react';
 import type { Components, ExtraProps } from 'react-markdown';
 import ReactMarkdown from 'react-markdown';
@@ -7,6 +7,8 @@ import rehypeRaw from 'rehype-raw';
 import rehypeSlug from 'rehype-slug';
 import rehypeAutolinkHeadings from 'rehype-autolink-headings';
 import rehypeSanitize, { defaultSchema } from 'rehype-sanitize';
+
+import { getDisplayLanguage, highlightCode } from '../../shared/lib/highlight';
 
 import styles from './MarkdownView.module.css';
 
@@ -109,9 +111,11 @@ const components: Components = {
         if (isValidElement<CodeElementProps>(firstChild)) {
             const className: string | undefined = firstChild.props.className;
             const languageMatch = /language-([\w-]+)/.exec(className || '');
-            const language = languageMatch?.[1]?.toUpperCase();
+            const rawLanguage = languageMatch?.[1];
+            const language = getDisplayLanguage(rawLanguage);
             const rawCode = firstChild.props.children;
             const codeContent = extractText(rawCode).replace(/\n$/, '');
+            const highlightedCode = highlightCode(codeContent, rawLanguage);
 
             const handleCopy = async () => {
                 if (!codeContent) {
@@ -149,6 +153,13 @@ const components: Components = {
                         ? 'Ошибка'
                         : 'Скопировать';
 
+            const {
+                className: originalClassName,
+                children: _codeChildren,
+                node: _codeNode,
+                ...restCodeProps
+            } = firstChild.props;
+
             return (
                 <pre data-language={language} {...props}>
                     <button
@@ -159,10 +170,12 @@ const components: Components = {
                     >
                         {copyLabel}
                     </button>
-                    {cloneElement<CodeElementProps>(firstChild, {
-                        'data-language': language,
-                        children: codeContent,
-                    })}
+                    <code
+                        {...restCodeProps}
+                        className={[originalClassName, 'hljs'].filter(Boolean).join(' ')}
+                        data-language={language}
+                        dangerouslySetInnerHTML={{ __html: highlightedCode }}
+                    />
                 </pre>
             );
         }

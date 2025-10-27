@@ -134,6 +134,68 @@
   padding: 0;
 }
 
+.root pre :global(.hljs) {
+  display: block;
+  font-family: var(--font-mono, 'JetBrains Mono', 'Fira Code', 'Menlo', monospace);
+  font-size: 0.9rem;
+  line-height: 1.6;
+  color: inherit;
+  background: none;
+  white-space: pre;
+  word-break: normal;
+}
+
+.root pre :global(.hljs-comment),
+.root pre :global(.hljs-quote) {
+  color: #8aa2d1;
+  font-style: italic;
+}
+
+.root pre :global(.hljs-keyword),
+.root pre :global(.hljs-selector-tag),
+.root pre :global(.hljs-subst) {
+  color: #ff8f6b;
+}
+
+.root pre :global(.hljs-string),
+.root pre :global(.hljs-title),
+.root pre :global(.hljs-section),
+.root pre :global(.hljs-doctag),
+.root pre :global(.hljs-selector-id),
+.root pre :global(.hljs-selector-class) {
+  color: #74f7c6;
+}
+
+.root pre :global(.hljs-number),
+.root pre :global(.hljs-literal),
+.root pre :global(.hljs-template-variable),
+.root pre :global(.hljs-variable) {
+  color: #ffd166;
+}
+
+.root pre :global(.hljs-attr),
+.root pre :global(.hljs-attribute) {
+  color: #9cc9ff;
+}
+
+.root pre :global(.hljs-symbol),
+.root pre :global(.hljs-bullet),
+.root pre :global(.hljs-built_in) {
+  color: #c792ea;
+}
+
+.root pre :global(.hljs-meta) {
+  color: #f78c6c;
+}
+
+.root pre :global(.hljs-addition) {
+  color: #a6e22e;
+}
+
+.root pre :global(.hljs-deletion) {
+  color: #ff5370;
+}
+
 .root table {
   width: 100%;
   border-collapse: collapse;
