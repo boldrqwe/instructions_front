@@ -89,6 +89,8 @@ const components: Components = {
         const lineResetTimerRef = useRef<number | null>(null);
         const childArray = Array.isArray(children) ? children : [children];
         const firstChild = childArray[0];
+        const { className: preClassName, ...restPreProps } = props;
+        const combinedPreClassName = [styles.pre, preClassName].filter(Boolean).join(' ');
 
         useEffect(() => {
             return () => {
@@ -192,36 +194,42 @@ const components: Components = {
                             {copyLabel}
                         </button>
                     </div>
-                    <pre data-language={language} className={styles.pre} {...props}>
-                        <code className={combinedClassName} data-language={language} {...restCodeProps}>
-                            {lines.map((line, index) => (
-                                <span
-                                    key={`code-line-${index}`}
-                                    className={
-                                        index === copiedLineIndex
-                                            ? `${styles.codeLine} ${styles.codeLineCopied}`
-                                            : styles.codeLine
-                                    }
-                                >
-                                    <button
-                                        type="button"
+                    <div className={styles.codeScroller}>
+                        <pre
+                            data-language={language}
+                            className={combinedPreClassName}
+                            {...restPreProps}
+                        >
+                            <code className={combinedClassName} data-language={language} {...restCodeProps}>
+                                {lines.map((line, index) => (
+                                    <span
+                                        key={`code-line-${index}`}
                                         className={
                                             index === copiedLineIndex
-                                                ? `${styles.lineNumberButton} ${styles.lineNumberButtonActive}`
-                                                : styles.lineNumberButton
+                                                ? `${styles.codeLine} ${styles.codeLineCopied}`
+                                                : styles.codeLine
                                         }
-                                        onClick={() => handleCopyLine(line, index)}
-                                        aria-label={`Скопировать строку ${index + 1}`}
                                     >
-                                        {index + 1}
-                                    </button>
-                                    <span className={styles.lineContent}>
-                                        {line === '' ? '\u00A0' : line}
+                                        <button
+                                            type="button"
+                                            className={
+                                                index === copiedLineIndex
+                                                    ? `${styles.lineNumberButton} ${styles.lineNumberButtonActive}`
+                                                    : styles.lineNumberButton
+                                            }
+                                            onClick={() => handleCopyLine(line, index)}
+                                            aria-label={`Скопировать строку ${index + 1}`}
+                                        >
+                                            {index + 1}
+                                        </button>
+                                        <span className={styles.lineContent}>
+                                            {line === '' ? '\u00A0' : line}
+                                        </span>
                                     </span>
-                                </span>
-                            ))}
-                        </code>
-                    </pre>
+                                ))}
+                            </code>
+                        </pre>
+                    </div>
                 </div>
             );
         }
