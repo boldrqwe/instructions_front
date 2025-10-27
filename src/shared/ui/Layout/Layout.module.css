@@ -168,13 +168,31 @@
 }
 
 .main {
+  --main-width: min(1320px, calc(100% - 2.5rem));
+  --main-margin-inline-start: auto;
+  --main-margin-inline-end: auto;
+  --main-padding-inline-start: clamp(2.6rem, 4vw, 3.6rem);
+  --main-padding-inline-end: clamp(2.6rem, 4vw, 3.6rem);
+
   flex: 1;
-  padding: clamp(2.6rem, 4vw, 3.6rem);
-  margin: clamp(2.4rem, 5vw, 3.8rem) auto clamp(3rem, 6vw, 4.5rem);
-  width: min(1320px, calc(100% - 2.5rem));
+  width: var(--main-width);
+  margin-block-start: clamp(2.4rem, 5vw, 3.8rem);
+  margin-block-end: clamp(3rem, 6vw, 4.5rem);
+  margin-inline-start: var(--main-margin-inline-start);
+  margin-inline-end: var(--main-margin-inline-end);
+  padding-block: clamp(2.6rem, 4vw, 3.6rem);
+  padding-inline-start: var(--main-padding-inline-start);
+  padding-inline-end: var(--main-padding-inline-end);
   position: relative;
   border-radius: clamp(1.8rem, 3vw, 2.6rem);
   z-index: 1;
+}
+
+.mainWide {
+  --main-width: 100%;
+  --main-margin-inline-start: 0;
+  --main-margin-inline-end: 0;
+  --main-padding-inline-start: 0;
 }
 
 .main::before {
