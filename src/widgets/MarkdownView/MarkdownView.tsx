@@ -111,19 +111,20 @@ const components: Components = {
             const languageMatch = /language-([\w-]+)/.exec(className || '');
             const language = languageMatch?.[1]?.toUpperCase();
             const rawCode = firstChild.props.children;
-            const codeContent = extractText(rawCode).replace(/\n$/, '');
+            const codeContent = extractText(rawCode).replace(/\r?\n$/, '');
+            const codeLines = codeContent.split(/\r?\n/);
 
-            const handleCopy = async () => {
-                if (!codeContent) {
+            const copyText = async (text: string) => {
+                if (text === undefined || text === null) {
                     return;
                 }
 
                 try {
                     if (navigator?.clipboard?.writeText) {
-                        await navigator.clipboard.writeText(codeContent);
+                        await navigator.clipboard.writeText(text);
                     } else {
                         const textarea = document.createElement('textarea');
-                        textarea.value = codeContent;
+                        textarea.value = text;
                         textarea.setAttribute('readonly', '');
                         textarea.style.position = 'absolute';
                         textarea.style.left = '-9999px';
@@ -140,6 +141,18 @@ const components: Components = {
                 } finally {
                     scheduleReset();
                 }
+            };
+
+            const handleCopy = async () => {
+                if (!codeContent) {
+                    return;
+                }
+
+                await copyText(codeContent);
+            };
+
+            const handleLineCopy = async (line: string) => {
+                await copyText(line);
             };
 
             const copyLabel =
@@ -161,7 +174,33 @@ const components: Components = {
                     </button>
                     {cloneElement<CodeElementProps>(firstChild, {
                         'data-language': language,
-                        children: codeContent,
+                        className: [firstChild.props.className, styles.codeBlock]
+                            .filter(Boolean)
+                            .join(' '),
+                        children: codeLines.map((line, index) => (
+                            <span
+                                key={index}
+                                className={styles.codeLine}
+                                data-line-number={index + 1}
+                                role="button"
+                                tabIndex={0}
+                                aria-label={`Скопировать строку ${index + 1}`}
+                                onClick={() => handleLineCopy(line)}
+                                onKeyDown={(event) => {
+                                    if (
+                                        event.key === 'Enter' ||
+                                        event.key === ' ' ||
+                                        event.key === 'Spacebar'
+                                    ) {
+                                        event.preventDefault();
+                                        void handleLineCopy(line);
+                                    }
+                                }}
+                                title="Нажмите, чтобы скопировать строку"
+                            >
+                                {line === '' ? '\u00A0' : line}
+                            </span>
+                        )),
                     })}
                 </pre>
             );
