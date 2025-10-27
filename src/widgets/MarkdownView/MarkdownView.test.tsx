@@ -15,6 +15,10 @@ describe('MarkdownView', () => {
     const codeElement = screen.getByText(/console\.log/);
     expect(codeElement).toBeVisible();
     expect(codeElement.closest('pre')).toHaveAttribute('data-language', 'TS');
+    expect(screen.getByRole('button', { name: 'Скопировать' })).toBeVisible();
+    const lineButtons = screen.getAllByRole('button', { name: /Скопировать строку/ });
+    expect(lineButtons).toHaveLength(1);
+    expect(lineButtons[0]).toHaveTextContent('1');
     expect(container.querySelector('[onclick]')).toBeNull();
   });
 });
