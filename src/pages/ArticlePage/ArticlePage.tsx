@@ -99,19 +99,13 @@ export function ArticlePage() {
   }, []);
 
   /** Загружаем статью по slug. */
-  const { data: article, isLoading, isError, error } = useArticleQuery(
-      slug ?? '',
-      Boolean(slug),
-  );
+  const { data: article, isLoading, isError, error } = useArticleQuery(slug ?? '', Boolean(slug));
 
   /** Плоские заголовки из HTML тела статьи. */
   const tocFlat = useHtmlToc(article?.body ?? '');
 
   /** Группируем под UI <Toc /> — главы + секции. */
-  const tocChapters: UiTocChapter[] = useMemo(
-      () => buildChaptersFrom(tocFlat),
-      [tocFlat],
-  );
+  const tocChapters: UiTocChapter[] = useMemo(() => buildChaptersFrom(tocFlat), [tocFlat]);
 
   /** Реальные DOM-элементы заголовков внутри контента — для наблюдения. */
   const contentRoot = contentRef.current;
@@ -119,50 +113,50 @@ export function ArticlePage() {
   const headingElements = useMemo<HTMLElement[]>(() => {
     if (!contentRoot || tocFlat.length === 0) return [];
     const root = contentRoot;
-    const esc = (s: string) =>
-        (window.CSS && 'escape' in window.CSS ? (window.CSS as any).escape(s) : s);
+    const esc = (value: string) =>
+      typeof window.CSS?.escape === 'function' ? window.CSS.escape(value) : value;
 
     return tocFlat
-        .map((h) => {
-          const id = esc(h.id);
-          const selectors = [`#${id}`, `#user-content-${id}`];
-          return selectors
-              .map((selector) => root.querySelector<HTMLElement>(selector))
-              .find(isHTMLElement);
-        })
-        .filter(isHTMLElement);
-  }, [contentRoot, tocFlat, article?.body]);
+      .map((h) => {
+        const id = esc(h.id);
+        const selectors = [`#${id}`, `#user-content-${id}`];
+        return selectors
+          .map((selector) => root.querySelector<HTMLElement>(selector))
+          .find(isHTMLElement);
+      })
+      .filter(isHTMLElement);
+  }, [contentRoot, tocFlat]);
 
   /** Подсветка активной секции при скролле. */
   useEffect(() => {
     if (headingElements.length === 0) return;
 
     const observer = new IntersectionObserver(
-        (entries) => {
-          const visible = entries
-              .filter((e) => e.isIntersecting)
-              .sort((a, b) => b.intersectionRatio - a.intersectionRatio);
+      (entries) => {
+        const visible = entries
+          .filter((e) => e.isIntersecting)
+          .sort((a, b) => b.intersectionRatio - a.intersectionRatio);
 
-          if (visible.length > 0) {
-            const id = (visible[0].target as HTMLElement).id;
-            setActiveSectionId(normalizeId(id));
-            return;
-          }
+        if (visible.length > 0) {
+          const id = (visible[0].target as HTMLElement).id;
+          setActiveSectionId(normalizeId(id));
+          return;
+        }
 
-          const firstAbove = entries
-              .filter((e) => e.boundingClientRect.top < 0)
-              .sort((a, b) => b.boundingClientRect.top - a.boundingClientRect.top);
+        const firstAbove = entries
+          .filter((e) => e.boundingClientRect.top < 0)
+          .sort((a, b) => b.boundingClientRect.top - a.boundingClientRect.top);
 
-          if (firstAbove.length > 0) {
-            const id = (firstAbove[0].target as HTMLElement).id;
-            setActiveSectionId(normalizeId(id));
-          }
-        },
-        {
-          // центральная «сладкая зона» — попадание даёт приоритет
-          rootMargin: '-40% 0px -40% 0px',
-          threshold: [0.1, 0.25, 0.5, 0.75],
-        },
+        if (firstAbove.length > 0) {
+          const id = (firstAbove[0].target as HTMLElement).id;
+          setActiveSectionId(normalizeId(id));
+        }
+      },
+      {
+        // центральная «сладкая зона» — попадание даёт приоритет
+        rootMargin: '-40% 0px -40% 0px',
+        threshold: [0.1, 0.25, 0.5, 0.75],
+      },
     );
 
     headingElements.forEach((el) => observer.observe(el));
@@ -193,9 +187,9 @@ export function ArticlePage() {
   if (isError) {
     if (error instanceof ApiError && error.status === 404) return <NotFoundPage />;
     return (
-        <div className={styles.error} role="alert">
-          Не удалось загрузить статью. Попробуйте обновить страницу.
-        </div>
+      <div className={styles.error} role="alert">
+        Не удалось загрузить статью. Попробуйте обновить страницу.
+      </div>
     );
   }
   if (!article) return null;
@@ -204,48 +198,50 @@ export function ArticlePage() {
   const isTocVisible = isDesktop || isTocOpen;
 
   return (
-      <article className={styles.layout}>
-        {/* Рендерим ToC только когда реально есть пункты */}
-        {tocChapters.length > 0 && (
-            <Toc
-                items={tocChapters} // <-- теперь форма данных такая, какую ожидает твой Toc
-                activeId={activeSectionId}
-                onNavigate={(id: string) => {
-                  scrollToAnchor(id);
-                  setActiveSectionId(id);
-                  if (!isDesktop) setIsTocOpen(false);
-                }}
-                isOpen={isTocVisible}
-                onClose={!isDesktop ? () => setIsTocOpen(false) : undefined}
-            />
+    <article className={styles.layout}>
+      {/* Рендерим ToC только когда реально есть пункты */}
+      {tocChapters.length > 0 && (
+        <Toc
+          items={tocChapters} // <-- теперь форма данных такая, какую ожидает твой Toc
+          activeId={activeSectionId}
+          onNavigate={(id: string) => {
+            scrollToAnchor(id);
+            setActiveSectionId(id);
+            if (!isDesktop) setIsTocOpen(false);
+          }}
+          isOpen={isTocVisible}
+          onClose={!isDesktop ? () => setIsTocOpen(false) : undefined}
+        />
+      )}
+
+      <div className={styles.content}>
+        {/* Кнопка открытия ToC — только на мобиле и только если есть пункты */}
+        {!isDesktop && tocChapters.length > 0 && (
+          <button
+            type="button"
+            className={styles.tocToggle}
+            onClick={() => setIsTocOpen((v) => !v)}
+          >
+            {isTocOpen ? 'Скрыть оглавление' : 'Открыть оглавление'}
+          </button>
         )}
 
-        <div className={styles.content}>
-          {/* Кнопка открытия ToC — только на мобиле и только если есть пункты */}
-          {!isDesktop && tocChapters.length > 0 && (
-              <button
-                  type="button"
-                  className={styles.tocToggle}
-                  onClick={() => setIsTocOpen((v) => !v)}
-              >
-                {isTocOpen ? 'Скрыть оглавление' : 'Открыть оглавление'}
-              </button>
-          )}
-
+        <div className={styles.article}>
           <header className={styles.header}>
             <h1 className={styles.title}>{article.title}</h1>
             <p className={styles.description}>{article.description}</p>
             <span className={styles.meta}>
-            Обновлено {new Date(article.updatedAt).toLocaleDateString('ru-RU')}
-          </span>
+              Обновлено {new Date(article.updatedAt).toLocaleDateString('ru-RU')}
+            </span>
           </header>
 
           {/* Контейнер с контентом: из него берём DOM заголовков для подсветки */}
-          <div className={styles.markdown} ref={contentRef}>
+          <div className={styles.articleBody} ref={contentRef}>
             <MarkdownView content={article.body} />
           </div>
         </div>
-      </article>
+      </div>
+    </article>
   );
 }
 
