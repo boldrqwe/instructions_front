@@ -1,5 +1,7 @@
 .wrapper {
   position: relative;
+  display: flex;
+  justify-content: flex-start;
 }
 
 .toggle {
@@ -20,7 +22,8 @@
 .panel {
   position: sticky;
   top: 6rem;
-  width: 260px;
+  width: 100%;
+  max-width: 280px;
   max-height: calc(100vh - 7rem);
   overflow-y: auto;
   background-color: var(--surface-elevated, #ffffff);

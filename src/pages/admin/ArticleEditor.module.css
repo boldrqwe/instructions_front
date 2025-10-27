@@ -1,11 +1,13 @@
 .layout {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 280px;
+  grid-template-columns: 300px minmax(0, 1fr);
+  grid-template-areas: 'sidebar main';
   gap: 2rem;
   padding: 2rem 0;
 }
 
 .mainColumn {
+  grid-area: main;
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
@@ -173,7 +175,10 @@
 }
 
 .sidebar {
+  grid-area: sidebar;
   position: relative;
+  display: flex;
+  justify-content: flex-start;
 }
 
 .hint {
@@ -187,6 +192,9 @@
 @media (max-width: 1023px) {
   .layout {
     grid-template-columns: 1fr;
+    grid-template-areas:
+      'main'
+      'sidebar';
   }
 
   .sidebar {

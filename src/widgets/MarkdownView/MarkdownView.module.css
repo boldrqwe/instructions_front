@@ -67,6 +67,20 @@
   overflow: hidden;
   box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
   display: grid;
+  --code-gutter-width: clamp(3.6rem, 7vw, 4.6rem);
+  --code-line-padding-x: 1.1rem;
+}
+
+.codeBlock::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: var(--code-gutter-width);
+  width: 1px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.25), rgba(255, 255, 255, 0.05));
+  pointer-events: none;
+  z-index: 1;
 }
 
 [data-theme='dark'] .codeBlock {
@@ -74,12 +88,18 @@
   box-shadow: inset 0 0 0 1px rgba(107, 139, 255, 0.25);
 }
 
+[data-theme='dark'] .codeBlock::after {
+  background: linear-gradient(180deg, rgba(107, 139, 255, 0.45), rgba(107, 139, 255, 0.12));
+}
+
 .codeHeader {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
-  padding: 0.75rem 1.1rem;
+  padding: 0.75rem var(--code-line-padding-x);
+  padding-left: calc(var(--code-gutter-width) + var(--code-line-padding-x));
   background: rgba(7, 19, 43, 0.35);
   border-bottom: 1px solid rgba(255, 255, 255, 0.12);
 }
@@ -159,10 +179,9 @@
 
 .codeLine {
   display: grid;
-  grid-template-columns: minmax(2.5rem, auto) 1fr;
+  grid-template-columns: var(--code-gutter-width) 1fr;
   align-items: stretch;
-  gap: 1.1rem;
-  padding: 0.2rem 1.1rem;
+  gap: 0;
   position: relative;
 }
 
@@ -183,17 +202,23 @@
 }
 
 .lineNumberButton {
-  justify-self: end;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
   border: none;
-  background: none;
+  background: transparent;
   color: rgba(255, 255, 255, 0.55);
   font-size: 0.75rem;
   font-weight: 500;
   font-family: inherit;
   cursor: pointer;
-  padding: 0;
+  padding: 0.2rem 0.75rem 0.2rem var(--code-line-padding-x);
   margin: 0;
   transition: color 0.15s ease;
+  min-width: calc(var(--code-gutter-width));
+  width: 100%;
+  box-sizing: border-box;
+  font-variant-numeric: tabular-nums;
 }
 
 .lineNumberButton:hover,
@@ -206,6 +231,8 @@
 }
 
 .lineContent {
+  display: block;
+  padding: 0.2rem var(--code-line-padding-x);
   white-space: pre;
   font-family: inherit;
 }
