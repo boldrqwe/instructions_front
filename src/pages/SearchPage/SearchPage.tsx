@@ -57,113 +57,169 @@ export function SearchPage() {
 
   const totalPages = data ? Math.ceil(data.total / PAGE_SIZE) : 0;
 
+  const hasQuery = debouncedQuery.trim().length > 0;
+
   return (
     <section className={styles.root} aria-labelledby="search-title">
-      <h1 id="search-title" className={styles.title}>
-        Поиск по инструкциям
-      </h1>
+      <header className={styles.hero}>
+        <div className={styles.heading}>
+          <p className={styles.label}>Справочный центр</p>
+          <h1 id="search-title" className={styles.title}>
+            Поиск статьи
+          </h1>
+          <p className={styles.subtitle}>
+            Найдите нужные материалы и разделы: мы собрали все инструкции и статьи в одном
+            месте, чтобы вы могли быстро перейти к нужному разделу документации.
+          </p>
+        </div>
 
-      <form className={styles.form} role="search" onSubmit={(event) => event.preventDefault()}>
-        <label className={styles.label}>
-          <span className="sr-only">Строка поиска</span>
-          <input
-            className={styles.input}
-            type="search"
-            value={inputValue}
-            placeholder="Введите запрос"
-            onChange={(event) => {
-              const value = event.target.value;
-              setInputValue(value);
-              setSearchParams((prev) => {
-                const params = new URLSearchParams(prev);
-                if (value) params.set('q', value);
-                else params.delete('q');
-                params.set('page', '0');
-                return params;
-              });
-            }}
-          />
-        </label>
-      </form>
+        <nav className={styles.tabs} aria-label="Основные разделы">
+          <span className={`${styles.tab} ${styles.tabActive}`}>Обзор</span>
+          <span className={styles.tab}>Обучение</span>
+          <span className={styles.tab}>Поддержка</span>
+        </nav>
 
-      {debouncedQuery.trim().length === 0 ? (
-        <p className={styles.state}>Введите запрос, чтобы увидеть результаты.</p>
-      ) : (
-        <div className={styles.results}>
-          {isFetching && <p className={styles.state}>Ищем…</p>}
+        <form className={styles.form} role="search" onSubmit={(event) => event.preventDefault()}>
+          <label className={styles.labelField}>
+            <span className="sr-only">Строка поиска</span>
+            <input
+              className={styles.input}
+              type="search"
+              value={inputValue}
+              placeholder="Поиск статьи"
+              onChange={(event) => {
+                const value = event.target.value;
+                setInputValue(value);
+                setSearchParams((prev) => {
+                  const params = new URLSearchParams(prev);
+                  if (value) params.set('q', value);
+                  else params.delete('q');
+                  params.set('page', '0');
+                  return params;
+                });
+              }}
+            />
+          </label>
+        </form>
+      </header>
 
-          {isError && !isFetching && (
-            <p className={styles.state} role="alert">
-              Ошибка: {error instanceof Error ? error.message : 'не удалось выполнить поиск'}
-            </p>
-          )}
-
-          {data && data.items.length === 0 && !isFetching && !isError && (
-            <p className={styles.state}>Ничего не найдено. Попробуйте другой запрос.</p>
-          )}
-
-          <ul className={styles.list}>
-            {data?.items.map((item) => {
-              const link =
-                item.type === 'section' && item.sectionAnchor
-                  ? `/articles/${item.slug}#${item.sectionAnchor}`
-                  : `/articles/${item.slug}`;
-
-              return (
-                <li key={`${item.type}-${item.id}`} className={styles.card}>
-                  <Link to={link} className={styles.link}>
-                    <span className={styles.badge} data-type={item.type}>
-                      {item.type === 'section' ? 'Секция' : 'Статья'}
-                    </span>
-                    <h2 className={styles.cardTitle}>{item.title}</h2>
-                    <p className={styles.snippet}>{clampSnippet(item.snippet, 200)}</p>
-                  </Link>
-                </li>
-              );
-            })}
+      <div className={styles.body}>
+        <aside className={styles.sidebar} aria-label="Содержание справочника">
+          <h2 className={styles.sidebarTitle}>Spring Framework</h2>
+          <ul className={styles.sidebarList}>
+            <li>
+              <a className={`${styles.sidebarLink} ${styles.sidebarLinkActive}`} href="#overview" aria-current="page">
+                Overview
+              </a>
+            </li>
+            <li>
+              <a className={styles.sidebarLink} href="#learn">
+                Learn
+              </a>
+            </li>
+            <li>
+              <a className={styles.sidebarLink} href="#support">
+                Support
+              </a>
+            </li>
+            <li>
+              <a className={styles.sidebarLink} href="#features">
+                Key features
+              </a>
+            </li>
+            <li>
+              <a className={styles.sidebarLink} href="#migration">
+                Migration policy
+              </a>
+            </li>
           </ul>
+        </aside>
 
-          {totalPages > 1 && (
-            <nav className={styles.pagination} aria-label="Навигация по страницам">
-              <button
-                type="button"
-                className={styles.pageButton}
-                onClick={() =>
-                  setSearchParams((prev) => {
-                    const params = new URLSearchParams(prev);
-                    const nextPage = Math.max(pageParam - 1, 0);
-                    params.set('page', String(nextPage));
-                    return params;
-                  })
-                }
-                disabled={pageParam <= 0}
-              >
-                Назад
-              </button>
+        <div className={styles.main}>
+          {hasQuery ? (
+            <div className={styles.results}>
+              {isFetching && <p className={styles.message}>Ищем…</p>}
 
-              <span className={styles.pageInfo}>
-                Страница {pageParam + 1} из {totalPages}
-              </span>
+              {isError && !isFetching && (
+                <p className={`${styles.message} ${styles.messageError}`} role="alert">
+                  Ошибка: {error instanceof Error ? error.message : 'не удалось выполнить поиск'}
+                </p>
+              )}
 
-              <button
-                type="button"
-                className={styles.pageButton}
-                onClick={() =>
-                  setSearchParams((prev) => {
-                    const params = new URLSearchParams(prev);
-                    const nextPage = Math.min(pageParam + 1, totalPages - 1);
-                    params.set('page', String(nextPage));
-                    return params;
-                  })
-                }
-                disabled={pageParam + 1 >= totalPages}
-              >
-                Вперёд
-              </button>
-            </nav>
+              {data && data.items.length === 0 && !isFetching && !isError && (
+                <p className={styles.message}>Ничего не найдено. Попробуйте другой запрос.</p>
+              )}
+
+              {data && data.items.length > 0 && (
+                <ul className={styles.list}>
+                  {data.items.map((item) => {
+                    const link =
+                      item.type === 'section' && item.sectionAnchor
+                        ? `/articles/${item.slug}#${item.sectionAnchor}`
+                        : `/articles/${item.slug}`;
+
+                    return (
+                      <li key={`${item.type}-${item.id}`} className={styles.result}>
+                        <Link to={link} className={styles.resultLink}>
+                          <span className={styles.resultBadge} data-type={item.type}>
+                            {item.type === 'section' ? 'Секция' : 'Статья'}
+                          </span>
+                          <h2 className={styles.resultTitle}>{item.title}</h2>
+                          <p className={styles.resultSnippet}>{clampSnippet(item.snippet, 200)}</p>
+                        </Link>
+                      </li>
+                    );
+                  })}
+                </ul>
+              )}
+
+              {totalPages > 1 && (
+                <nav className={styles.pagination} aria-label="Навигация по страницам">
+                  <button
+                    type="button"
+                    className={styles.pageButton}
+                    onClick={() =>
+                      setSearchParams((prev) => {
+                        const params = new URLSearchParams(prev);
+                        const nextPage = Math.max(pageParam - 1, 0);
+                        params.set('page', String(nextPage));
+                        return params;
+                      })
+                    }
+                    disabled={pageParam <= 0}
+                  >
+                    Назад
+                  </button>
+
+                  <span className={styles.pageInfo}>
+                    Страница {pageParam + 1} из {totalPages}
+                  </span>
+
+                  <button
+                    type="button"
+                    className={styles.pageButton}
+                    onClick={() =>
+                      setSearchParams((prev) => {
+                        const params = new URLSearchParams(prev);
+                        const nextPage = Math.min(pageParam + 1, totalPages - 1);
+                        params.set('page', String(nextPage));
+                        return params;
+                      })
+                    }
+                    disabled={pageParam + 1 >= totalPages}
+                  >
+                    Вперёд
+                  </button>
+                </nav>
+              )}
+            </div>
+          ) : (
+            <div className={styles.empty}>
+              <p className={styles.message}>Введите запрос, чтобы увидеть результаты.</p>
+            </div>
           )}
         </div>
-      )}
+      </div>
     </section>
   );
 }
