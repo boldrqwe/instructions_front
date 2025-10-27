@@ -1,4 +1,4 @@
-import { cloneElement, isValidElement, useEffect, useRef, useState } from 'react';
+import { isValidElement, useEffect, useRef, useState } from 'react';
 import type { ComponentPropsWithoutRef, ReactNode } from 'react';
 import type { Components, ExtraProps } from 'react-markdown';
 import ReactMarkdown from 'react-markdown';
@@ -84,7 +84,9 @@ const components: Components = {
     },
     pre({ children, node: _node, ...props }: PreProps) {
         const [copyStatus, setCopyStatus] = useState<'idle' | 'copied' | 'error'>('idle');
+        const [copiedLineIndex, setCopiedLineIndex] = useState<number | null>(null);
         const resetTimerRef = useRef<number | null>(null);
+        const lineResetTimerRef = useRef<number | null>(null);
         const childArray = Array.isArray(children) ? children : [children];
         const firstChild = childArray[0];
 
@@ -92,6 +94,9 @@ const components: Components = {
             return () => {
                 if (resetTimerRef.current) {
                     window.clearTimeout(resetTimerRef.current);
+                }
+                if (lineResetTimerRef.current) {
+                    window.clearTimeout(lineResetTimerRef.current);
                 }
             };
         }, []);
@@ -106,39 +111,62 @@ const components: Components = {
             }, 2000);
         };
 
+        const scheduleLineReset = () => {
+            if (lineResetTimerRef.current) {
+                window.clearTimeout(lineResetTimerRef.current);
+            }
+
+            lineResetTimerRef.current = window.setTimeout(() => {
+                setCopiedLineIndex(null);
+            }, 1500);
+        };
+
+        const copyText = async (value: string) => {
+            if (navigator?.clipboard?.writeText) {
+                await navigator.clipboard.writeText(value);
+                return;
+            }
+
+            const textarea = document.createElement('textarea');
+            textarea.value = value;
+            textarea.setAttribute('readonly', '');
+            textarea.style.position = 'absolute';
+            textarea.style.left = '-9999px';
+            document.body.appendChild(textarea);
+            textarea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textarea);
+        };
+
         if (isValidElement<CodeElementProps>(firstChild)) {
-            const className: string | undefined = firstChild.props.className;
+            const { children: _ignoredChildren, className, ...restCodeProps } = firstChild.props;
             const languageMatch = /language-([\w-]+)/.exec(className || '');
             const language = languageMatch?.[1]?.toUpperCase();
             const rawCode = firstChild.props.children;
             const codeContent = extractText(rawCode).replace(/\n$/, '');
+            const lines = codeContent.split('\n');
+            const combinedClassName = [className, styles.code].filter(Boolean).join(' ');
 
             const handleCopy = async () => {
-                if (!codeContent) {
-                    return;
-                }
-
                 try {
-                    if (navigator?.clipboard?.writeText) {
-                        await navigator.clipboard.writeText(codeContent);
-                    } else {
-                        const textarea = document.createElement('textarea');
-                        textarea.value = codeContent;
-                        textarea.setAttribute('readonly', '');
-                        textarea.style.position = 'absolute';
-                        textarea.style.left = '-9999px';
-                        document.body.appendChild(textarea);
-                        textarea.select();
-                        document.execCommand('copy');
-                        document.body.removeChild(textarea);
-                    }
-
+                    await copyText(codeContent);
                     setCopyStatus('copied');
                 } catch (error) {
                     console.error('Failed to copy code', error);
                     setCopyStatus('error');
                 } finally {
                     scheduleReset();
+                }
+            };
+
+            const handleCopyLine = async (lineValue: string, index: number) => {
+                try {
+                    await copyText(lineValue);
+                    setCopiedLineIndex(index);
+                } catch (error) {
+                    console.error('Failed to copy line', error);
+                } finally {
+                    scheduleLineReset();
                 }
             };
 
@@ -150,20 +178,51 @@ const components: Components = {
                         : 'Скопировать';
 
             return (
-                <pre data-language={language} {...props}>
-                    <button
-                        type="button"
-                        className={styles.copyButton}
-                        onClick={handleCopy}
-                        aria-live="polite"
-                    >
-                        {copyLabel}
-                    </button>
-                    {cloneElement<CodeElementProps>(firstChild, {
-                        'data-language': language,
-                        children: codeContent,
-                    })}
-                </pre>
+                <div className={styles.codeBlock}>
+                    <div className={styles.codeHeader}>
+                        <span className={styles.languageBadge}>
+                            {language || 'TEXT'}
+                        </span>
+                        <button
+                            type="button"
+                            className={styles.copyButton}
+                            onClick={handleCopy}
+                            aria-live="polite"
+                        >
+                            {copyLabel}
+                        </button>
+                    </div>
+                    <pre data-language={language} className={styles.pre} {...props}>
+                        <code className={combinedClassName} data-language={language} {...restCodeProps}>
+                            {lines.map((line, index) => (
+                                <span
+                                    key={`code-line-${index}`}
+                                    className={
+                                        index === copiedLineIndex
+                                            ? `${styles.codeLine} ${styles.codeLineCopied}`
+                                            : styles.codeLine
+                                    }
+                                >
+                                    <button
+                                        type="button"
+                                        className={
+                                            index === copiedLineIndex
+                                                ? `${styles.lineNumberButton} ${styles.lineNumberButtonActive}`
+                                                : styles.lineNumberButton
+                                        }
+                                        onClick={() => handleCopyLine(line, index)}
+                                        aria-label={`Скопировать строку ${index + 1}`}
+                                    >
+                                        {index + 1}
+                                    </button>
+                                    <span className={styles.lineContent}>
+                                        {line === '' ? '\u00A0' : line}
+                                    </span>
+                                </span>
+                            ))}
+                        </code>
+                    </pre>
+                </div>
             );
         }
 
