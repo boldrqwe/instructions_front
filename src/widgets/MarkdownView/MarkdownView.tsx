@@ -46,6 +46,26 @@ type CodeElementProps = {
     'data-language'?: string;
 };
 
+function extractText(node: ReactNode): string {
+    if (typeof node === 'string' || typeof node === 'number') {
+        return String(node);
+    }
+
+    if (!node) {
+        return '';
+    }
+
+    if (Array.isArray(node)) {
+        return node.map((child) => extractText(child)).join('');
+    }
+
+    if (isValidElement(node)) {
+        return extractText(node.props.children);
+    }
+
+    return '';
+}
+
 const components: Components = {
     code({ inline, className, children, node: _node, ...props }: CodeProps) {
         if (inline) {
@@ -91,10 +111,7 @@ const components: Components = {
             const languageMatch = /language-([\w-]+)/.exec(className || '');
             const language = languageMatch?.[1]?.toUpperCase();
             const rawCode = firstChild.props.children;
-            const codeContent =
-                typeof rawCode === 'string'
-                    ? rawCode.replace(/\n$/, '')
-                    : String(rawCode).replace(/\n$/, '');
+            const codeContent = extractText(rawCode).replace(/\n$/, '');
 
             const handleCopy = async () => {
                 if (!codeContent) {
