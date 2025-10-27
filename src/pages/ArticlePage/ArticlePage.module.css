@@ -1,11 +1,11 @@
 .layout {
   position: relative;
   display: grid;
-  grid-template-columns: minmax(220px, 280px) minmax(0, 1fr);
+  grid-template-columns: max-content minmax(0, 1fr);
   gap: clamp(2.2rem, 4vw, 3.2rem);
   align-items: flex-start;
-  width: min(1080px, 100%);
-  margin: 0 auto;
+  width: 100%;
+  margin: 0;
   padding: clamp(1.6rem, 3vw, 2.2rem);
   border-radius: clamp(1.8rem, 3vw, 2.6rem);
 }
