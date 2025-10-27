@@ -1,0 +1,69 @@
+.previewSection {
+  display: grid;
+  gap: 1.5rem;
+}
+
+.previewHeader {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.previewTitle {
+  margin: 0;
+  font-size: 1.45rem;
+}
+
+.previewHint {
+  margin: 0;
+  color: var(--text-muted, #6b7280);
+  font-size: 0.95rem;
+}
+
+.previewSurface {
+  position: relative;
+  padding: clamp(1.5rem, 2vw, 2rem);
+  border-radius: clamp(1.8rem, 3vw, 2.3rem);
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.12), rgba(59, 130, 246, 0.08));
+  box-shadow: inset 0 0 0 1px rgba(16, 185, 129, 0.15);
+}
+
+.article {
+  margin: 0 auto;
+  width: min(960px, 100%);
+  box-shadow: var(--shadow-card);
+}
+
+.articleBody {
+  position: relative;
+  z-index: 1;
+}
+
+.articleBody::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  opacity: 0.5;
+}
+
+.placeholder {
+  color: var(--text-muted, #9ca3af);
+  font-style: italic;
+}
+
+.emptyContent {
+  margin: 0;
+  padding: 2rem;
+  border-radius: 1rem;
+  background: rgba(16, 185, 129, 0.12);
+  color: var(--primary-strong, #047857);
+  text-align: center;
+  font-weight: 600;
+}
+
+@media (max-width: 640px) {
+  .previewSurface {
+    padding: clamp(1rem, 4vw, 1.5rem);
+  }
+}
