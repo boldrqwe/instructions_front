@@ -11,7 +11,7 @@ permissions:
 
 env:
   IMAGE: ghcr.io/boldrqwe/instructions_front
-  VITE_API_BASE_URL: /api
+  VITE_API_BASE_URL: /api/v1
 
 jobs:
   build-and-push:
