@@ -1,4 +1,4 @@
-import { NavLink } from 'react-router-dom';
+import { NavLink, useLocation } from 'react-router-dom';
 import { useAuth } from '../../model/auth';
 import styles from './Layout.module.css';
 
@@ -8,6 +8,12 @@ import styles from './Layout.module.css';
  */
 export function Layout({ children }: { children: React.ReactNode }) {
   const { isAdmin, logout } = useAuth();
+  const location = useLocation();
+  const { pathname } = location;
+
+  const isArticleView = pathname.startsWith('/articles/');
+  const isEditorView = /^\/admin\/articles\/(?:new|[^/]+\/edit)$/.test(pathname);
+  const isWideLayout = isArticleView || isEditorView;
   return (
     <div className={styles.root}>
       <div className={styles.ambient} aria-hidden="true">
@@ -76,7 +82,9 @@ export function Layout({ children }: { children: React.ReactNode }) {
           )}
         </nav>
       </header>
-      <main className={styles.main}>{children}</main>
+      <main className={isWideLayout ? `${styles.main} ${styles.mainWide}` : styles.main}>
+        {children}
+      </main>
     </div>
   );
 }

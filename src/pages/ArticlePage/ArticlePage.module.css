@@ -6,7 +6,9 @@
   align-items: flex-start;
   width: 100%;
   margin: 0;
-  padding: clamp(1.6rem, 3vw, 2.2rem);
+  padding-block: clamp(1.6rem, 3vw, 2.2rem);
+  padding-inline-end: clamp(1.6rem, 3vw, 2.2rem);
+  padding-inline-start: 0;
   border-radius: clamp(1.8rem, 3vw, 2.6rem);
 }
 
