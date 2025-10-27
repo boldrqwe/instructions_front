@@ -8,6 +8,7 @@ import { useTiptapEditor } from './ArticleEditor/hooks/useTiptapEditor.ts';
 import { replaceImageSource, removeImageBySrc } from './ArticleEditor/utils/editorImageUtils.ts';
 import { EditorToolbar } from './EditorToolbar.tsx';
 import { ArticleMetaForm } from './ArticleMetaForm.tsx';
+import { ArticlePreview } from './ArticleEditor/ArticlePreview.tsx';
 
 import { Button } from '../../shared/ui/Button';
 import { Card } from '../../shared/ui/Card';
@@ -58,6 +59,7 @@ export function ArticleEditor({ onEditorReady, autoSaveDelayMs }: ArticleEditorP
     const [coverImageUrl, setCoverImageUrl] = useState('');
     const [contentHtml, setContentHtml] = useState('');
     const [contentJson, setContentJson] = useState<unknown>({});
+    const [updatedAt, setUpdatedAt] = useState<string | null>(null);
     const [isLoading, setLoading] = useState(Boolean(id));
     const [error, setError] = useState<string | null>(null);
     const [isCoverUploading, setCoverUploading] = useState(false);
@@ -127,6 +129,7 @@ export function ArticleEditor({ onEditorReady, autoSaveDelayMs }: ArticleEditorP
             setStatus(result.status);
             setHasUnsavedChanges(false);
             setSaveStatus('saved');
+            setUpdatedAt(result.updatedAt);
             return result;
         } catch (err) {
             setSaveStatus('idle');
@@ -209,6 +212,7 @@ export function ArticleEditor({ onEditorReady, autoSaveDelayMs }: ArticleEditorP
         setCoverImageUrl('');
         setContentHtml('');
         setContentJson({});
+        setUpdatedAt(null);
         setSaveStatus('idle');
         setHasUnsavedChanges(false);
         setUploadError(null);
@@ -245,6 +249,7 @@ export function ArticleEditor({ onEditorReady, autoSaveDelayMs }: ArticleEditorP
         setCoverImageUrl(article.coverImageUrl ?? '');
         setContentHtml(article.contentHtml);
         setContentJson(article.contentJson);
+        setUpdatedAt(article.updatedAt);
         setUploadError(null);
         skipNextEditorUpdate.current = true;
         editor?.commands.setContent(article.contentJson ?? article.contentHtml ?? '<p></p>');
@@ -271,6 +276,7 @@ export function ArticleEditor({ onEditorReady, autoSaveDelayMs }: ArticleEditorP
             setStatus(result.status);
             setHasUnsavedChanges(false);
             setSaveStatus('saved');
+            setUpdatedAt(result.updatedAt);
         } catch (err) {
             setError((err as Error).message);
         }
@@ -283,6 +289,7 @@ export function ArticleEditor({ onEditorReady, autoSaveDelayMs }: ArticleEditorP
             setStatus(result.status);
             setHasUnsavedChanges(false);
             setSaveStatus('saved');
+            setUpdatedAt(result.updatedAt);
         } catch (err) {
             setError((err as Error).message);
         }
@@ -360,7 +367,12 @@ export function ArticleEditor({ onEditorReady, autoSaveDelayMs }: ArticleEditorP
                 {isPreviewOpen ? (
                     <Card className={styles.previewCard}>
                         <h2>Предпросмотр</h2>
-                        <div className={styles.previewBody} dangerouslySetInnerHTML={{ __html: contentHtml }} />
+                        <ArticlePreview
+                            title={title}
+                            summary={summary}
+                            contentHtml={contentHtml}
+                            updatedAt={updatedAt}
+                        />
                     </Card>
                 ) : null}
             </div>

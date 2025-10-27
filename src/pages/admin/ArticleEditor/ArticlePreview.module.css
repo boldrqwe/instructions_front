@@ -1,0 +1,14 @@
+.placeholder {
+  margin: 0;
+  padding: clamp(1.2rem, 3vw, 1.6rem);
+  border-radius: 1rem;
+  background: rgba(15, 23, 42, 0.04);
+  color: var(--text-muted, #64748b);
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
+[data-theme='dark'] .placeholder {
+  background: rgba(148, 163, 184, 0.08);
+  color: #cbd5f5;
+}

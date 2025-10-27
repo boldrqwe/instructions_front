@@ -7,10 +7,11 @@ import { ApiError } from '../../shared/config/api';
 import { scrollToAnchor } from '../../shared/lib/scrollToAnchor';
 import { PageSpinner } from '../../shared/ui/PageSpinner/PageSpinner';
 import { MarkdownView } from '../../widgets/MarkdownView/MarkdownView';
-import { Toc } from '../../widgets/Toc/Toc';
+import { Toc, type UiTocChapter } from '../../widgets/Toc/Toc';
+import { buildChaptersFromTocItems } from '../../widgets/Toc/lib/buildChaptersFromTocItems';
 import { NotFoundPage } from '../NotFoundPage/NotFoundPage';
 import styles from './ArticlePage.module.css';
-import { useHtmlToc, type TocItem } from '../../shared/lib/useHtmlToc';
+import { useHtmlToc } from '../../shared/lib/useHtmlToc';
 
 /** Узкий type-guard, чтобы TS понял, что это HTMLElement. */
 function isHTMLElement(el: unknown): el is HTMLElement {
@@ -19,46 +20,6 @@ function isHTMLElement(el: unknown): el is HTMLElement {
 
 function normalizeId(id: string) {
   return id.startsWith('user-content-') ? id.replace('user-content-', '') : id;
-}
-
-/**
- * UI-тип, который обычно ждёт твой <Toc />:
- * глава с набором секций. (Если у тебя в Toc другие имена полей —
- * поменяй ниже в адаптере соответствующие ключи.)
- */
-type UiTocSection = { id: string; title: string };
-type UiTocChapter = { id: string; title: string; sections: UiTocSection[] };
-
-/**
- * Простой адаптер плоских заголовков → главы/секции для <Toc />.
- *
- * Правило группировки:
- * - h1: игнорируем в ToC (это заголовок всей статьи).
- * - h2: создаёт новую главу.
- * - h3: добавляется как секция в последнюю h2-главу.
- * - h4–h6: складываем тоже в последнюю главу как плоские секции.
- *
- * При желании легко усложнить (вложенные уровни и т.п.).
- */
-function buildChaptersFrom(items: TocItem[]): UiTocChapter[] {
-  const chapters: UiTocChapter[] = [];
-
-  for (const h of items) {
-    if (h.level <= 1) {
-      // h1 пропускаем
-      continue;
-    }
-    if (h.level === 2) {
-      chapters.push({ id: h.id, title: h.text, sections: [] });
-      continue;
-    }
-    // h3–h6 → секции последней главы; если главы ещё нет — создаём «Без раздела»
-    if (chapters.length === 0) {
-      chapters.push({ id: 'misc', title: 'Раздел', sections: [] });
-    }
-    chapters[chapters.length - 1].sections.push({ id: h.id, title: h.text });
-  }
-  return chapters;
 }
 
 /**
@@ -105,7 +66,7 @@ export function ArticlePage() {
   const tocFlat = useHtmlToc(article?.body ?? '');
 
   /** Группируем под UI <Toc /> — главы + секции. */
-  const tocChapters: UiTocChapter[] = useMemo(() => buildChaptersFrom(tocFlat), [tocFlat]);
+  const tocChapters: UiTocChapter[] = useMemo(() => buildChaptersFromTocItems(tocFlat), [tocFlat]);
 
   /** Реальные DOM-элементы заголовков внутри контента — для наблюдения. */
   const contentRoot = contentRef.current;
