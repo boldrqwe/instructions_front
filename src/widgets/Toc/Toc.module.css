@@ -21,6 +21,7 @@
   backdrop-filter: var(--glass-blur);
   scrollbar-width: thin;
   scrollbar-gutter: stable;
+  margin-left: 2%;
 }
 
 [data-theme='dark'] .toc {
