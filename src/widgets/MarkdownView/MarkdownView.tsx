@@ -9,6 +9,7 @@ import rehypeAutolinkHeadings from 'rehype-autolink-headings';
 import rehypeSanitize, { defaultSchema } from 'rehype-sanitize';
 
 import styles from './MarkdownView.module.css';
+import { rehypeWrapStandaloneCode } from './lib/rehypeWrapStandaloneCode';
 
 /**
  * Безопасная схема для `rehype-sanitize`, разрешающая нужные HTML-теги.
@@ -255,6 +256,7 @@ export function MarkdownView({ content }: { content: string }) {
                 remarkPlugins={[remarkGfm]}
                 rehypePlugins={[
                     rehypeRaw,                         // Разрешает HTML внутри Markdown
+                    rehypeWrapStandaloneCode,          // Превращает одиночные <code> в полноценные блоки
                     rehypeSlug,                        // Проставляет id для заголовков
                     [rehypeAutolinkHeadings, { behavior: 'append' }], // Делает заголовки ссылками
                     [rehypeSanitize, schema],          // Безопасная очистка
