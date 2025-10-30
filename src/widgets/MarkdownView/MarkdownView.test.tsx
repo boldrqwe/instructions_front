@@ -21,4 +21,19 @@ describe('MarkdownView', () => {
     expect(lineButtons[0]).toHaveTextContent('1');
     expect(container.querySelector('[onclick]')).toBeNull();
   });
+
+  test('wraps standalone code tags into code blocks', () => {
+    const markdown = `<code class="language-bash">echo "hello"\nls -la</code>`;
+
+    render(<MarkdownView content={markdown} />);
+
+    const codeElement = screen.getByText('ls -la');
+    const preElement = codeElement.closest('pre');
+
+    expect(preElement).not.toBeNull();
+    expect(preElement).toHaveAttribute('data-language', 'BASH');
+    expect(screen.getByRole('button', { name: 'Скопировать' })).toBeVisible();
+    const lineButtons = screen.getAllByRole('button', { name: /Скопировать строку/ });
+    expect(lineButtons).toHaveLength(2);
+  });
 });
