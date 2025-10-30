@@ -146,10 +146,9 @@
 }
 
 .pre {
-  margin: 0;
-  padding: 0.85rem 0;
-  overflow: auto;
-  font-size: 0.9rem;
+  white-space: pre;       /* важно: сохраняет все пробелы и переносы */
+  font-family: monospace;
+  overflow-x: auto;
 }
 
 .code {
