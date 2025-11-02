@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import { describe, expect, test } from 'vitest';
 import { MarkdownView } from './MarkdownView';
 
@@ -6,7 +6,7 @@ describe('MarkdownView', () => {
   /**
    * Проверяем, что таблицы и код рендерятся, а потенциальный XSS блокируется.
    */
-  test('renders markdown tables and code blocks safely', () => {
+  test('renders markdown tables and code blocks safely', async () => {
     const markdown = `| A | B |\n| - | - |\n| 1 | 2 |\n\n\`\`\`ts\nconsole.log('secure');\n\`\`\`\n\n<div onclick="alert('xss')">Не должно отрендериться</div>`;
 
     const { container } = render(<MarkdownView content={markdown} />);
@@ -19,6 +19,9 @@ describe('MarkdownView', () => {
     const lineButtons = screen.getAllByRole('button', { name: /Скопировать строку/ });
     expect(lineButtons).toHaveLength(1);
     expect(lineButtons[0]).toHaveTextContent('1');
+    await waitFor(() => {
+      expect(container.querySelector('.hljs-string')).toBeTruthy();
+    });
     expect(container.querySelector('[onclick]')).toBeNull();
   });
 });

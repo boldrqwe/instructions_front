@@ -119,7 +119,10 @@
   color: rgba(10, 21, 46, 0.9);
   background: rgba(255, 255, 255, 0.85);
   box-shadow: 0 0 0 1px rgba(15, 42, 88, 0.12);
-  transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.15s ease,
+    background 0.15s ease;
 }
 
 .copyButton:hover,
@@ -146,7 +149,7 @@
 }
 
 .pre {
-  white-space: pre;       /* важно: сохраняет все пробелы и переносы */
+  white-space: pre; /* важно: сохраняет все пробелы и переносы */
   font-family: monospace;
   overflow-x: auto;
 }
@@ -207,6 +210,101 @@
 .lineContent {
   white-space: pre;
   font-family: inherit;
+}
+
+.lineContentHighlighted {
+  display: block;
+}
+
+.codeBlock :global(.hljs) {
+  color: #f5f8ff;
+  background: transparent;
+  font-family: inherit;
+}
+
+.codeBlock :global(.hljs-comment),
+.codeBlock :global(.hljs-quote) {
+  color: rgba(173, 193, 255, 0.7);
+  font-style: italic;
+}
+
+.codeBlock :global(.hljs-keyword),
+.codeBlock :global(.hljs-selector-tag),
+.codeBlock :global(.hljs-literal),
+.codeBlock :global(.hljs-doctag) {
+  color: #ffdd7c;
+}
+
+.codeBlock :global(.hljs-number),
+.codeBlock :global(.hljs-attr),
+.codeBlock :global(.hljs-template-variable) {
+  color: #6fc3ff;
+}
+
+.codeBlock :global(.hljs-string),
+.codeBlock :global(.hljs-meta .hljs-string),
+.codeBlock :global(.hljs-symbol),
+.codeBlock :global(.hljs-bullet) {
+  color: #7fe7b7;
+}
+
+.codeBlock :global(.hljs-title),
+.codeBlock :global(.hljs-section),
+.codeBlock :global(.hljs-name) {
+  color: #f0a3ff;
+}
+
+.codeBlock :global(.hljs-attribute),
+.codeBlock :global(.hljs-built_in),
+.codeBlock :global(.hljs-selector-id),
+.codeBlock :global(.hljs-selector-class) {
+  color: #9cd5ff;
+}
+
+.codeBlock :global(.hljs-variable),
+.codeBlock :global(.hljs-params) {
+  color: #ffe0b5;
+}
+
+.codeBlock :global(.hljs-addition) {
+  color: #b9f6ca;
+}
+
+.codeBlock :global(.hljs-deletion) {
+  color: #ff8a80;
+}
+
+[data-theme='light'] .codeBlock {
+  background: linear-gradient(135deg, #f0f4ff 0%, #d9e6ff 100%);
+  color: #0f1b39;
+}
+
+[data-theme='light'] .codeHeader {
+  background: rgba(213, 224, 255, 0.6);
+  border-bottom-color: rgba(47, 92, 255, 0.25);
+}
+
+[data-theme='light'] .lineNumberButton {
+  color: rgba(15, 27, 57, 0.5);
+}
+
+[data-theme='light'] .lineNumberButton:hover,
+[data-theme='light'] .lineNumberButton:focus-visible,
+[data-theme='light'] .lineNumberButtonActive {
+  color: rgba(15, 27, 57, 0.85);
+}
+
+[data-theme='light'] .codeLine:nth-child(odd) {
+  background: rgba(15, 27, 57, 0.05);
+}
+
+[data-theme='light'] .codeBlock :global(.hljs) {
+  color: #1b2745;
+}
+
+[data-theme='light'] .codeBlock :global(.hljs-comment),
+[data-theme='light'] .codeBlock :global(.hljs-quote) {
+  color: rgba(46, 64, 110, 0.6);
 }
 
 .root table {
