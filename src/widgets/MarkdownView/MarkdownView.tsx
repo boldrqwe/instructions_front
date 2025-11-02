@@ -1,4 +1,4 @@
-import { isValidElement, useEffect, useRef, useState } from 'react';
+import { isValidElement, useEffect, useMemo, useRef, useState } from 'react';
 import type { ComponentPropsWithoutRef, ReactNode } from 'react';
 import type { Components, ExtraProps } from 'react-markdown';
 import ReactMarkdown from 'react-markdown';
@@ -64,6 +64,153 @@ function extractText(node: ReactNode): string {
     }
 
     return '';
+}
+
+function countIndentUnits(line: string): { units: number; endIndex: number } {
+    let units = 0;
+    let index = 0;
+
+    while (index < line.length) {
+        const char = line[index];
+        if (char === ' ') {
+            units += 1;
+        } else if (char === '\t') {
+            units += 4;
+        } else {
+            break;
+        }
+        index += 1;
+    }
+
+    return { units, endIndex: index };
+}
+
+function trimIndentUnits(line: string, unitsToRemove: number): string {
+    if (unitsToRemove <= 0) {
+        return line;
+    }
+
+    let removedUnits = 0;
+    let index = 0;
+
+    while (index < line.length && removedUnits < unitsToRemove) {
+        const char = line[index];
+        if (char === ' ') {
+            removedUnits += 1;
+        } else if (char === '\t') {
+            removedUnits += 4;
+        } else {
+            break;
+        }
+        index += 1;
+    }
+
+    return line.slice(index);
+}
+
+function normalizeMarkdownContent(raw: string): string {
+    if (!raw) {
+        return '';
+    }
+
+    const normalizedNewlines = raw.replace(/\r\n?/g, '\n');
+    const lines = normalizedNewlines.split('\n');
+    const markdownPattern = /^(#{1,6}\s+|[-*+]\s+|\d+\.\s+|>+\s+|```|~~~)/;
+
+    let minimalIndent = Infinity;
+    let inFence = false;
+
+    for (const line of lines) {
+        const trimmed = line.trim();
+        if (trimmed.length === 0) {
+            continue;
+        }
+
+        const trimmedStart = line.trimStart();
+        if (trimmedStart.startsWith('```') || trimmedStart.startsWith('~~~')) {
+            inFence = !inFence;
+            continue;
+        }
+
+        if (inFence) {
+            continue;
+        }
+
+        if (trimmedStart.startsWith('<')) {
+            continue;
+        }
+
+        const { units } = countIndentUnits(line);
+        if (units === 0) {
+            minimalIndent = 0;
+            break;
+        }
+
+        if (units < minimalIndent) {
+            minimalIndent = units;
+        }
+    }
+
+    if (!Number.isFinite(minimalIndent)) {
+        minimalIndent = 0;
+    }
+
+    const dedentedLines: string[] = [];
+    inFence = false;
+
+    for (const line of lines) {
+        const trimmedStart = line.trimStart();
+        const isFence = trimmedStart.startsWith('```') || trimmedStart.startsWith('~~~');
+
+        if (isFence) {
+            dedentedLines.push(trimIndentUnits(line, minimalIndent));
+            inFence = !inFence;
+            continue;
+        }
+
+        if (inFence) {
+            dedentedLines.push(line);
+            continue;
+        }
+
+        dedentedLines.push(trimIndentUnits(line, minimalIndent));
+    }
+
+    const finalLines: string[] = [];
+    inFence = false;
+
+    for (const line of dedentedLines) {
+        const trimmedStart = line.trimStart();
+        const isFence = trimmedStart.startsWith('```') || trimmedStart.startsWith('~~~');
+
+        if (isFence) {
+            finalLines.push(trimmedStart);
+            inFence = !inFence;
+            continue;
+        }
+
+        if (inFence) {
+            finalLines.push(line);
+            continue;
+        }
+
+        const { units, endIndex } = countIndentUnits(line);
+        if (units <= 3) {
+            finalLines.push(line);
+            continue;
+        }
+
+        const afterIndent = line.slice(endIndex);
+        if (!markdownPattern.test(afterIndent)) {
+            finalLines.push(line);
+            continue;
+        }
+
+        const toRemove = units - 3;
+        finalLines.push(trimIndentUnits(line, toRemove));
+    }
+
+    return finalLines.join('\n');
 }
 
 const components: Components = {
@@ -249,6 +396,8 @@ const components: Components = {
  * ```
  */
 export function MarkdownView({ content }: { content: string }) {
+    const normalizedContent = useMemo(() => normalizeMarkdownContent(content), [content]);
+
     return (
         <div className={styles.root}>
             <ReactMarkdown
@@ -261,7 +410,7 @@ export function MarkdownView({ content }: { content: string }) {
                 ]}
                 components={components}
             >
-                {content}
+                {normalizedContent}
             </ReactMarkdown>
         </div>
     );

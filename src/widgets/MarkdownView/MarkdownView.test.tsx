@@ -21,4 +21,26 @@ describe('MarkdownView', () => {
     expect(lineButtons[0]).toHaveTextContent('1');
     expect(container.querySelector('[onclick]')).toBeNull();
   });
+
+  test('normalizes excessive indentation so markdown renders correctly', () => {
+    const markdown = [
+      '    ## Заголовок',
+      '    ',
+      '    Текст под заголовком.',
+      '    - Первый пункт списка',
+      '    - Второй пункт списка',
+      '    ',
+      '        ```bash',
+      '        echo "test"',
+      '        ```',
+    ].join('\n');
+
+    render(<MarkdownView content={markdown} />);
+
+    expect(screen.getByRole('heading', { level: 2, name: 'Заголовок' })).toBeVisible();
+    expect(screen.getByText('Первый пункт списка')).toBeVisible();
+    expect(screen.getByText('Второй пункт списка')).toBeVisible();
+    expect(screen.getByText('echo "test"')).toBeVisible();
+    expect(screen.getByRole('button', { name: 'Скопировать' })).toBeVisible();
+  });
 });
