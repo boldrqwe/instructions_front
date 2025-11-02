@@ -1,0 +1,109 @@
+.code-block {
+  width: 100%;
+  background: #1e1e1e;
+  border-radius: 12px;
+  border: 1px solid #333;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  font-family: ui-monospace, SFMono-Regular, SFMono-Regular, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  color: #d4d4d4;
+}
+
+.code-block-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 16px;
+  background: #252526;
+  border-bottom: 1px solid #2c2c2c;
+}
+
+.code-block-language {
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #9cdcfe;
+}
+
+.code-block-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.copy-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: none;
+  border-radius: 8px;
+  padding: 6px 10px;
+  background: #2d2d30;
+  color: #d4d4d4;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.copy-button:hover,
+.copy-button:focus-visible {
+  background: #3c3c42;
+  transform: translateY(-1px);
+}
+
+.copy-button:active {
+  transform: translateY(0);
+}
+
+.pre {
+  margin: 0;
+  width: 100%;
+  white-space: pre;
+  word-wrap: normal;
+  overflow-x: auto;
+}
+
+.code-line {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 0 8px;
+  min-height: 20px;
+}
+
+.code-line:hover {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.code-line-active {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.code-line-number {
+  display: inline-flex;
+  justify-content: flex-end;
+  width: 32px;
+  padding-right: 8px;
+  color: #858585;
+  user-select: none;
+}
+
+.code-line-content {
+  display: inline-block;
+  white-space: pre;
+  word-wrap: normal;
+}
+
+.code-editor-container {
+  background: #1e1e1e;
+  width: 100%;
+  flex: 1 1 auto;
+  display: flex;
+  position: relative;
+}

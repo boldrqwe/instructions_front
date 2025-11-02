@@ -44,169 +44,25 @@
   color: var(--primary-strong);
 }
 
-.root code {
-  background: rgba(47, 92, 255, 0.12);
-  border-radius: 0.4rem;
-  padding: 0.2rem 0.45rem;
-}
-
 .root pre {
   font-family: var(--font-mono, 'Fira Code', 'JetBrains Mono', 'SFMono-Regular', monospace);
 }
 
-.root pre code {
-  background: none;
-  padding: 0;
+:global(.inline-code) {
+  background: rgba(30, 30, 30, 0.12);
+  border-radius: 6px;
+  padding: 2px 6px;
+  font-family: ui-monospace, SFMono-Regular, SFMono-Regular, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  white-space: nowrap;
+  word-break: normal;
+  text-decoration: none;
+  border: 1px solid transparent;
+  color: inherit;
 }
 
-.codeBlock {
-  position: relative;
-  background: linear-gradient(135deg, #143871 0%, #0f2a58 100%);
-  color: #eef4ff;
-  border-radius: 1rem;
-  overflow: hidden;
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
-  display: grid;
-}
-
-[data-theme='dark'] .codeBlock {
-  background: linear-gradient(135deg, #0c1c3a 0%, #040b18 100%);
-  box-shadow: inset 0 0 0 1px rgba(107, 139, 255, 0.25);
-}
-
-.codeHeader {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-  padding: 0.75rem 1.1rem;
-  background: rgba(7, 19, 43, 0.35);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
-}
-
-[data-theme='dark'] .codeHeader {
-  background: rgba(13, 27, 61, 0.6);
-  border-bottom-color: rgba(107, 139, 255, 0.3);
-}
-
-.languageBadge {
-  font-size: 0.65rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  padding: 0.25rem 0.6rem;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.18);
-  color: rgba(10, 21, 46, 0.85);
-  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.35);
-}
-
-[data-theme='dark'] .languageBadge {
-  background: rgba(107, 139, 255, 0.18);
-  color: #e6ecff;
-  box-shadow: 0 0 0 1px rgba(107, 139, 255, 0.45);
-}
-
-.copyButton {
-  border: none;
-  border-radius: 999px;
-  padding: 0.35rem 0.9rem;
-  font-size: 0.7rem;
-  font-weight: 600;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  cursor: pointer;
-  color: rgba(10, 21, 46, 0.9);
-  background: rgba(255, 255, 255, 0.85);
-  box-shadow: 0 0 0 1px rgba(15, 42, 88, 0.12);
-  transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
-}
-
-.copyButton:hover,
-.copyButton:focus-visible {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(9, 20, 44, 0.22);
-  background: rgba(255, 255, 255, 0.95);
-}
-
-.copyButton:active {
-  transform: translateY(0);
-  box-shadow: 0 2px 6px rgba(9, 20, 44, 0.25);
-}
-
-[data-theme='dark'] .copyButton {
-  color: #f3f5ff;
-  background: rgba(28, 42, 86, 0.85);
-  box-shadow: 0 0 0 1px rgba(107, 139, 255, 0.4);
-}
-
-[data-theme='dark'] .copyButton:hover,
-[data-theme='dark'] .copyButton:focus-visible {
-  background: rgba(40, 60, 112, 0.92);
-}
-
-.pre {
-  white-space: pre;       /* важно: сохраняет все пробелы и переносы */
-  font-family: monospace;
-  overflow-x: auto;
-}
-
-.code {
-  display: block;
-  font-family: var(--font-mono, 'Fira Code', 'JetBrains Mono', 'SFMono-Regular', monospace);
-}
-
-.codeLine {
-  display: grid;
-  grid-template-columns: minmax(2.5rem, auto) 1fr;
-  align-items: stretch;
-  gap: 1.1rem;
-  padding: 0.2rem 1.1rem;
-  position: relative;
-}
-
-.codeLine:nth-child(odd) {
-  background: rgba(255, 255, 255, 0.03);
-}
-
-[data-theme='dark'] .codeLine:nth-child(odd) {
-  background: rgba(107, 139, 255, 0.08);
-}
-
-.codeLineCopied {
-  background: rgba(255, 255, 255, 0.12) !important;
-}
-
-[data-theme='dark'] .codeLineCopied {
-  background: rgba(107, 139, 255, 0.25) !important;
-}
-
-.lineNumberButton {
-  justify-self: end;
-  border: none;
-  background: none;
-  color: rgba(255, 255, 255, 0.55);
-  font-size: 0.75rem;
-  font-weight: 500;
-  font-family: inherit;
-  cursor: pointer;
-  padding: 0;
-  margin: 0;
-  transition: color 0.15s ease;
-}
-
-.lineNumberButton:hover,
-.lineNumberButton:focus-visible {
-  color: #ffffff;
-}
-
-.lineNumberButtonActive {
-  color: #ffffff;
-}
-
-.lineContent {
-  white-space: pre;
-  font-family: inherit;
+:global(.inline-code:hover),
+:global(.inline-code:focus-visible) {
+  border-color: rgba(30, 30, 30, 0.18);
 }
 
 .root table {
