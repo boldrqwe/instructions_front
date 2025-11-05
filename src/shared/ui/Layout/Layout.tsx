@@ -40,6 +40,14 @@ export function Layout({ children }: { children: React.ReactNode }) {
           >
             Поиск
           </NavLink>
+          <NavLink
+            to="/tools/binary"
+            className={({ isActive }) =>
+              isActive ? `${styles.link} ${styles.linkActive}` : styles.link
+            }
+          >
+            Двоичный тренажер
+          </NavLink>
           {isAdmin ? (
             <div className={styles.actions}>
               <NavLink

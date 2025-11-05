@@ -1,0 +1,135 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  width: min(960px, 100%);
+  margin: 0 auto;
+  padding: 2rem 1.5rem 3rem;
+}
+
+.header {
+  text-align: center;
+  display: grid;
+  gap: 0.75rem;
+}
+
+.title {
+  font-size: clamp(2rem, 4vw, 2.75rem);
+  font-weight: 700;
+  color: var(--color-text-primary, #0b1b24);
+}
+
+.subtitle {
+  color: var(--color-text-secondary, #4b5d68);
+  font-size: 1rem;
+  line-height: 1.6;
+  margin: 0 auto;
+  max-width: 520px;
+}
+
+.cards {
+  display: grid;
+  gap: 1.5rem;
+}
+
+@media (min-width: 768px) {
+  .cards {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.card {
+  background: rgba(255, 255, 255, 0.85);
+  border-radius: 1.25rem;
+  padding: 1.75rem;
+  box-shadow: 0 18px 45px rgba(22, 53, 80, 0.12);
+  display: grid;
+  gap: 1rem;
+  position: relative;
+}
+
+.card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(circle at top right, rgba(0, 209, 255, 0.25), transparent 55%),
+    radial-gradient(circle at bottom left, rgba(81, 255, 170, 0.2), transparent 50%);
+  z-index: 0;
+}
+
+.card > * {
+  position: relative;
+  z-index: 1;
+}
+
+.cardTitle {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--color-text-primary, #0b1b24);
+}
+
+.label {
+  font-weight: 500;
+  color: var(--color-text-primary, #0b1b24);
+}
+
+.input {
+  border: 1px solid rgba(8, 38, 63, 0.12);
+  border-radius: 0.75rem;
+  padding: 0.85rem 1rem;
+  font-size: 1.05rem;
+  font-family: inherit;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.input:focus {
+  outline: none;
+  border-color: rgba(10, 163, 140, 0.65);
+  box-shadow: 0 0 0 3px rgba(10, 163, 140, 0.15);
+}
+
+.error {
+  color: #d64550;
+  font-size: 0.9rem;
+}
+
+.hint {
+  color: var(--color-text-secondary, #4b5d68);
+  font-size: 0.9rem;
+}
+
+.result {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.resultLabel {
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.75rem;
+  color: var(--color-text-secondary, #4b5d68);
+}
+
+.resultValue {
+  font-size: clamp(1.4rem, 3.5vw, 1.85rem);
+  font-weight: 700;
+  word-break: break-all;
+  color: var(--color-text-primary, #0b1b24);
+}
+
+.footer {
+  background: rgba(8, 38, 63, 0.04);
+  border-radius: 1.5rem;
+  padding: 1.75rem 2rem;
+  display: grid;
+  gap: 0.75rem;
+  color: var(--color-text-secondary, #2c3a44);
+}
+
+.footerTitle {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--color-text-primary, #0b1b24);
+}
