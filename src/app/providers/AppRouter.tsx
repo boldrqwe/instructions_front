@@ -20,6 +20,12 @@ const SearchPage = lazy(() =>
   import('../../pages/SearchPage/SearchPage').then(m => ({ default: m.SearchPage }))
 );
 /**
+ * Подключает тренажер двоичных чисел по требованию.
+ */
+const BinaryTrainerPage = lazy(() =>
+  import('../../pages/BinaryTrainerPage/BinaryTrainerPage').then(m => ({ default: m.BinaryTrainerPage }))
+);
+/**
  * Загружает страницу статьи по требованию, уменьшая стартовый бандл.
  */
 const ArticlePage = lazy(() =>
@@ -69,6 +75,7 @@ export function AppRouter() {
           <Suspense fallback={<PageSpinner />}>
             <Routes>
               <Route path="/" element={<HomePage />} />
+              <Route path="/tools/binary" element={<BinaryTrainerPage />} />
               <Route path="/search" element={<SearchPage />} />
               <Route path="/articles/:slug" element={<ArticlePage />} />
               <Route path="/admin/login" element={<LoginPage />} />
