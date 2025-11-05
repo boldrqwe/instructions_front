@@ -225,19 +225,44 @@
 }
 
 .instruction {
+  position: relative;
   background: rgba(9, 54, 77, 0.05);
   border-radius: 0.75rem;
-  padding: 0.65rem 0.75rem;
+  padding: 0.65rem 0.75rem 0.65rem 2.4rem;
   display: flex;
   justify-content: space-between;
   gap: 0.75rem;
   align-items: center;
-  transition: transform 0.15s ease, background 0.15s ease;
+  transition: transform 0.18s ease, background 0.18s ease;
+}
+
+.instruction::before {
+  content: '';
+  position: absolute;
+  left: 0.95rem;
+  top: 50%;
+  width: 0.7rem;
+  height: 0.7rem;
+  border-radius: 50%;
+  border: 2px solid rgba(214, 69, 80, 0.65);
+  background: rgba(214, 69, 80, 0.15);
+  box-shadow: 0 0 0 0 rgba(214, 69, 80, 0.35);
+  transform: translateY(-50%) scale(0.35);
+  opacity: 0;
+  transition: transform 0.2s ease, opacity 0.2s ease, box-shadow 0.25s ease,
+    background 0.25s ease;
 }
 
 .instructionActive {
-  background: linear-gradient(135deg, rgba(0, 153, 255, 0.18), rgba(81, 255, 170, 0.2));
+  background: linear-gradient(135deg, rgba(0, 153, 255, 0.18), rgba(81, 255, 170, 0.26));
   transform: translateX(6px);
+}
+
+.instructionActive::before {
+  opacity: 1;
+  transform: translateY(-50%) scale(1);
+  background: rgba(214, 69, 80, 0.85);
+  box-shadow: 0 0 0 4px rgba(214, 69, 80, 0.2), 0 0 14px rgba(214, 69, 80, 0.35);
 }
 
 .instructionIndex {
@@ -248,6 +273,12 @@
 .instructionText {
   flex: 1;
   color: var(--color-text-primary, #0b1b24);
+}
+
+.instructionActive .instructionIndex,
+.instructionActive .instructionText {
+  color: #031c2a;
+  font-weight: 700;
 }
 
 .phaseCard {
