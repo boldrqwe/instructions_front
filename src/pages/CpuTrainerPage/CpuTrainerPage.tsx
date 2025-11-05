@@ -479,7 +479,7 @@ function executeInstruction(state: CpuState, instruction: Instruction, program: 
 }
 
 export function CpuTrainerPage() {
-  const [programText, setProgramText] = useState(SAMPLE_PROGRAMS[0].source);
+  const [programText, setProgramText] = useState<string>(SAMPLE_PROGRAMS[0].source);
   const initialParse = useMemo(() => parseProgram(SAMPLE_PROGRAMS[0].source), []);
   const [program, setProgram] = useState<Program | null>(initialParse.program);
   const [errors, setErrors] = useState<string[]>(initialParse.errors);
@@ -530,7 +530,7 @@ export function CpuTrainerPage() {
   }, [programText]);
 
   const handleReset = useCallback(() => {
-    setCpuState(prev => createInitialState(program));
+    setCpuState(() => createInitialState(program));
     setPhase('fetch');
     setFetchedInstruction(null);
     setExplanation('Состояние процессора сброшено. Нажмите «Шаг» для новой итерации.');
