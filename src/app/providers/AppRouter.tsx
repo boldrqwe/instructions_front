@@ -26,6 +26,12 @@ const BinaryTrainerPage = lazy(() =>
   import('../../pages/BinaryTrainerPage/BinaryTrainerPage').then(m => ({ default: m.BinaryTrainerPage }))
 );
 /**
+ * Подключает тренажер процессора при обращении к странице.
+ */
+const CpuTrainerPage = lazy(() =>
+  import('../../pages/CpuTrainerPage/CpuTrainerPage').then(m => ({ default: m.CpuTrainerPage }))
+);
+/**
  * Загружает страницу статьи по требованию, уменьшая стартовый бандл.
  */
 const ArticlePage = lazy(() =>
@@ -76,6 +82,7 @@ export function AppRouter() {
             <Routes>
               <Route path="/" element={<HomePage />} />
               <Route path="/tools/binary" element={<BinaryTrainerPage />} />
+              <Route path="/tools/cpu" element={<CpuTrainerPage />} />
               <Route path="/search" element={<SearchPage />} />
               <Route path="/articles/:slug" element={<ArticlePage />} />
               <Route path="/admin/login" element={<LoginPage />} />
