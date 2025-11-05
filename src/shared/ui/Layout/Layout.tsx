@@ -49,6 +49,14 @@ export function Layout({ children }: { children: React.ReactNode }) {
             Двоичный тренажер
           </NavLink>
           <NavLink
+            to="/tools/assembler"
+            className={({ isActive }) =>
+              isActive ? `${styles.link} ${styles.linkActive}` : styles.link
+            }
+          >
+            Ассемблер-компилятор
+          </NavLink>
+          <NavLink
             to="/tools/cpu"
             className={({ isActive }) =>
               isActive ? `${styles.link} ${styles.linkActive}` : styles.link

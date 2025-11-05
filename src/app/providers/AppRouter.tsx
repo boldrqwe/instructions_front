@@ -26,6 +26,12 @@ const BinaryTrainerPage = lazy(() =>
   import('../../pages/BinaryTrainerPage/BinaryTrainerPage').then(m => ({ default: m.BinaryTrainerPage }))
 );
 /**
+ * Подключает страницу компилятора ассемблера при обращении к утилите.
+ */
+const AssemblerCompilerPage = lazy(() =>
+  import('../../pages/AssemblerCompilerPage/AssemblerCompilerPage').then(m => ({ default: m.AssemblerCompilerPage }))
+);
+/**
  * Подключает тренажер процессора при обращении к странице.
  */
 const CpuTrainerPage = lazy(() =>
@@ -82,6 +88,7 @@ export function AppRouter() {
             <Routes>
               <Route path="/" element={<HomePage />} />
               <Route path="/tools/binary" element={<BinaryTrainerPage />} />
+              <Route path="/tools/assembler" element={<AssemblerCompilerPage />} />
               <Route path="/tools/cpu" element={<CpuTrainerPage />} />
               <Route path="/search" element={<SearchPage />} />
               <Route path="/articles/:slug" element={<ArticlePage />} />
