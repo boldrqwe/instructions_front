@@ -4,212 +4,229 @@ import styles from './BinaryTrainerPage.module.css';
 
 const MAX_DECIMAL_SAFE = Number.MAX_SAFE_INTEGER;
 const MAX_BINARY_LENGTH = MAX_DECIMAL_SAFE.toString(2).length;
+const MAX_OCTAL_LENGTH = MAX_DECIMAL_SAFE.toString(8).length;
+const MAX_HEX_LENGTH = MAX_DECIMAL_SAFE.toString(16).length;
+const SAFE_DECIMAL_STRING = MAX_DECIMAL_SAFE.toLocaleString('ru-RU');
 
-function normalizeDecimal(value: string) {
-  return value.replace(/[^0-9]/g, '');
+type BaseKey = 'binary' | 'octal' | 'decimal' | 'hex';
+
+type BaseValues = Record<BaseKey, string>;
+type BaseErrors = Record<BaseKey, string | null>;
+
+interface BaseConfig {
+  radix: number;
+  title: string;
+  label: string;
+  resultLabel: string;
+  placeholder: string;
+  hint: string;
+  normalize: (value: string) => string;
+  invalidCharsMessage: string;
+  rangeError?: string;
+  inputMode?: 'numeric' | 'text';
+  prepareInput?: (value: string) => string;
 }
 
-function normalizeBinary(value: string) {
-  return value.replace(/[^01]/g, '');
-}
+const BASE_ORDER: BaseKey[] = ['binary', 'octal', 'decimal', 'hex'];
+
+const BASE_CONFIG: Record<BaseKey, BaseConfig> = {
+  binary: {
+    radix: 2,
+    title: 'Двоичная система',
+    label: 'Двоичное число',
+    resultLabel: 'Двоичная запись',
+    placeholder: 'Например, 101101',
+    hint: `Используйте только 0 и 1. Максимум ${MAX_BINARY_LENGTH} бит (${SAFE_DECIMAL_STRING} в десятичном виде).`,
+    normalize: (value) => value.replace(/[^01]/g, ''),
+    invalidCharsMessage: 'Используйте только цифры 0 и 1.',
+    rangeError: `Поддерживаются числа до ${MAX_BINARY_LENGTH} бит (${SAFE_DECIMAL_STRING} в десятичном виде).`,
+    inputMode: 'numeric',
+  },
+  octal: {
+    radix: 8,
+    title: 'Восьмеричная система',
+    label: 'Восьмеричное число',
+    resultLabel: 'Восьмеричная запись',
+    placeholder: 'Например, 725',
+    hint: `Используйте цифры 0–7. Максимум ${MAX_OCTAL_LENGTH} разрядов (${SAFE_DECIMAL_STRING} в десятичном виде).`,
+    normalize: (value) => value.replace(/[^0-7]/g, ''),
+    invalidCharsMessage: 'Допустимы только цифры от 0 до 7.',
+    rangeError: `Введите число до ${SAFE_DECIMAL_STRING}.`,
+    inputMode: 'numeric',
+  },
+  decimal: {
+    radix: 10,
+    title: 'Десятичная система',
+    label: 'Десятичное число',
+    resultLabel: 'Десятичное значение',
+    placeholder: 'Например, 45',
+    hint: `Введите целое число до ${SAFE_DECIMAL_STRING}.`,
+    normalize: (value) => value.replace(/[^0-9]/g, ''),
+    invalidCharsMessage: 'Используйте только арабские цифры.',
+    rangeError: `Введите число до ${SAFE_DECIMAL_STRING}.`,
+    inputMode: 'numeric',
+  },
+  hex: {
+    radix: 16,
+    title: 'Шестнадцатеричная система',
+    label: 'Шестнадцатеричное число',
+    resultLabel: 'Шестнадцатеричная запись',
+    placeholder: 'Например, FF1A',
+    hint: `Используйте цифры 0–9 и буквы A–F. Максимум ${MAX_HEX_LENGTH} символов (${SAFE_DECIMAL_STRING} в десятичном виде).`,
+    normalize: (value) => value.replace(/[^0-9a-f]/gi, ''),
+    invalidCharsMessage: 'Допустимы цифры 0–9 и буквы A–F.',
+    rangeError: `Введите число до ${SAFE_DECIMAL_STRING}.`,
+    inputMode: 'text',
+    prepareInput: (value) => value.toUpperCase(),
+  },
+};
+
+const createEmptyValues = (): BaseValues => ({
+  binary: '',
+  octal: '',
+  decimal: '',
+  hex: '',
+});
+
+const createEmptyErrors = (): BaseErrors => ({
+  binary: null,
+  octal: null,
+  decimal: null,
+  hex: null,
+});
+
+const convertFromDecimal = (value: number): BaseValues => ({
+  binary: value.toString(2),
+  octal: value.toString(8),
+  decimal: value.toString(10),
+  hex: value.toString(16).toUpperCase(),
+});
 
 /**
- * Интерактивный тренажер двоичных чисел, позволяющий конвертировать значения
- * между двоичной и десятичной системами счисления.
+ * Интерактивный тренажер систем счисления для конвертации между 2, 8, 10 и 16 основаниями.
  */
 export function BinaryTrainerPage() {
-  const [binaryValue, setBinaryValue] = useState('');
-  const [decimalValue, setDecimalValue] = useState('');
-  const [binaryError, setBinaryError] = useState<string | null>(null);
-  const [decimalError, setDecimalError] = useState<string | null>(null);
+  const [values, setValues] = useState<BaseValues>(() => createEmptyValues());
+  const [errors, setErrors] = useState<BaseErrors>(() => createEmptyErrors());
 
-  const handleBinaryChange: ChangeEventHandler<HTMLInputElement> = (event) => {
+  const handleChange = (baseKey: BaseKey): ChangeEventHandler<HTMLInputElement> => (event) => {
     const rawValue = event.target.value.trim();
     if (rawValue === '') {
-      setBinaryValue('');
-      setDecimalValue('');
-      setBinaryError(null);
-      setDecimalError(null);
+      setValues(createEmptyValues());
+      setErrors(createEmptyErrors());
       return;
     }
 
-    const sanitized = normalizeBinary(rawValue);
-    if (sanitized !== rawValue) {
-      setBinaryError('Используйте только цифры 0 и 1.');
-      setBinaryValue(sanitized);
-      if (sanitized) {
-        const parsed = parseInt(sanitized, 2);
-        if (!Number.isNaN(parsed)) {
-          setDecimalValue(parsed.toString(10));
-        } else {
-          setDecimalValue('');
-        }
-      } else {
-        setDecimalValue('');
-      }
+    const config = BASE_CONFIG[baseKey];
+    const normalized = config.normalize(rawValue);
+    const prepared = config.prepareInput ? config.prepareInput(normalized) : normalized;
+    const hasSanitized = normalized !== rawValue;
+
+    if (prepared === '') {
+      setValues({ ...createEmptyValues(), [baseKey]: '' });
+      setErrors({
+        ...createEmptyErrors(),
+        [baseKey]: hasSanitized ? config.invalidCharsMessage : null,
+      });
       return;
     }
 
-    if (sanitized.length > MAX_BINARY_LENGTH) {
-      setBinaryError(`Поддерживаются числа до ${MAX_BINARY_LENGTH} бит.`);
-      const trimmed = sanitized.slice(0, MAX_BINARY_LENGTH);
-      setBinaryValue(trimmed);
-      const parsed = parseInt(trimmed, 2);
-      setDecimalValue(Number.isNaN(parsed) ? '' : parsed.toString(10));
+    const parsed = Number.parseInt(prepared, config.radix);
+
+    if (!Number.isFinite(parsed) || Number.isNaN(parsed)) {
+      setValues({ ...createEmptyValues(), [baseKey]: prepared });
+      setErrors({
+        ...createEmptyErrors(),
+        [baseKey]: hasSanitized ? config.invalidCharsMessage : 'Не удалось преобразовать число.',
+      });
       return;
     }
 
-    try {
-      const parsed = parseInt(sanitized, 2);
-      if (Number.isNaN(parsed)) {
-        setBinaryError('Не удалось преобразовать число.');
-        return;
-      }
-      setBinaryError(null);
-      setDecimalError(null);
-      setBinaryValue(sanitized);
-      setDecimalValue(parsed.toString(10));
-    } catch (error) {
-      console.error('[BinaryTrainerPage] parse binary error', error);
-      setBinaryError('Что-то пошло не так при преобразовании.');
-    }
-  };
-
-  const handleDecimalChange: ChangeEventHandler<HTMLInputElement> = (event) => {
-    const rawValue = event.target.value.trim();
-    if (rawValue === '') {
-      setDecimalValue('');
-      setBinaryValue('');
-      setBinaryError(null);
-      setDecimalError(null);
+    if (parsed < 0 || !Number.isSafeInteger(parsed) || parsed > MAX_DECIMAL_SAFE) {
+      setValues({ ...createEmptyValues(), [baseKey]: prepared });
+      setErrors({
+        ...createEmptyErrors(),
+        [baseKey]: config.rangeError ?? `Введите число до ${SAFE_DECIMAL_STRING}.`,
+      });
       return;
     }
 
-    const sanitized = normalizeDecimal(rawValue);
-    if (sanitized !== rawValue) {
-      setDecimalError('Используйте только арабские цифры.');
-      setDecimalValue(sanitized);
-      if (sanitized) {
-        const parsed = Number.parseInt(sanitized, 10);
-        if (Number.isSafeInteger(parsed)) {
-          const binary = parsed.toString(2);
-          setBinaryValue(
-            binary.length > MAX_BINARY_LENGTH ? binary.slice(0, MAX_BINARY_LENGTH) : binary
-          );
-        } else {
-          setBinaryValue('');
-        }
-      } else {
-        setBinaryValue('');
-      }
-      return;
-    }
+    const converted = convertFromDecimal(parsed);
+    converted[baseKey] = prepared;
 
-    try {
-      const parsed = Number.parseInt(sanitized, 10);
-      if (!Number.isSafeInteger(parsed)) {
-        setDecimalError(`Введите целое число до ${MAX_DECIMAL_SAFE.toLocaleString('ru-RU')}.`);
-        return;
-      }
-      const binary = parsed.toString(2);
-      if (binary.length > MAX_BINARY_LENGTH) {
-        setDecimalError(`Число слишком большое: более ${MAX_BINARY_LENGTH} бит в двоичной записи.`);
-        return;
-      }
-      setDecimalError(null);
-      setBinaryError(null);
-      setDecimalValue(sanitized);
-      setBinaryValue(binary);
-    } catch (error) {
-      console.error('[BinaryTrainerPage] parse decimal error', error);
-      setDecimalError('Что-то пошло не так при преобразовании.');
-    }
+    setValues(converted);
+    setErrors({
+      ...createEmptyErrors(),
+      [baseKey]: hasSanitized ? config.invalidCharsMessage : null,
+    });
   };
 
   return (
     <section className={styles.root} aria-labelledby="binary-trainer-title">
       <header className={styles.header}>
         <h1 id="binary-trainer-title" className={styles.title}>
-          Тренажер двоичных чисел
+          Тренажер систем счисления
         </h1>
         <p className={styles.subtitle}>
-          Введите число в двоичном или десятичном формате — перевод выполнится мгновенно.
+          Переводите числа между двоичной, восьмеричной, десятичной и шестнадцатеричной системами мгновенно.
         </p>
       </header>
 
       <div className={styles.cards}>
-        <div className={styles.card}>
-          <h2 className={styles.cardTitle}>Двоичное → Десятичное</h2>
-          <label className={styles.label} htmlFor="binary-input">
-            Двоичное число
-          </label>
-          <input
-            id="binary-input"
-            className={styles.input}
-            inputMode="numeric"
-            autoComplete="off"
-            autoCorrect="off"
-            spellCheck={false}
-            value={binaryValue}
-            onChange={handleBinaryChange}
-            placeholder="Например, 101101"
-            aria-describedby={binaryError ? 'binary-error' : undefined}
-          />
-          {binaryError ? (
-            <p id="binary-error" className={styles.error} role="alert">
-              {binaryError}
-            </p>
-          ) : (
-            <p className={styles.hint}>
-              Максимум {MAX_BINARY_LENGTH} бит ({MAX_DECIMAL_SAFE.toLocaleString('ru-RU')} в десятичном виде).
-            </p>
-          )}
-          <div className={styles.result}>
-            <span className={styles.resultLabel}>Десятичное значение</span>
-            <output className={styles.resultValue} aria-live="polite">
-              {decimalValue || '—'}
-            </output>
-          </div>
-        </div>
+        {BASE_ORDER.map((baseKey) => {
+          const config = BASE_CONFIG[baseKey];
+          const inputId = `${baseKey}-input`;
+          const errorId = `${baseKey}-error`;
+          const errorMessage = errors[baseKey];
 
-        <div className={styles.card}>
-          <h2 className={styles.cardTitle}>Десятичное → Двоичное</h2>
-          <label className={styles.label} htmlFor="decimal-input">
-            Десятичное число
-          </label>
-          <input
-            id="decimal-input"
-            className={styles.input}
-            inputMode="numeric"
-            autoComplete="off"
-            autoCorrect="off"
-            spellCheck={false}
-            value={decimalValue}
-            onChange={handleDecimalChange}
-            placeholder="Например, 45"
-            aria-describedby={decimalError ? 'decimal-error' : undefined}
-          />
-          {decimalError ? (
-            <p id="decimal-error" className={styles.error} role="alert">
-              {decimalError}
-            </p>
-          ) : (
-            <p className={styles.hint}>Используйте только неотрицательные целые числа.</p>
-          )}
-          <div className={styles.result}>
-            <span className={styles.resultLabel}>Двоичная запись</span>
-            <output className={styles.resultValue} aria-live="polite">
-              {binaryValue || '—'}
-            </output>
-          </div>
-        </div>
+          return (
+            <div key={baseKey} className={styles.card}>
+              <h2 className={styles.cardTitle}>{config.title}</h2>
+              <label className={styles.label} htmlFor={inputId}>
+                {config.label}
+              </label>
+              <input
+                id={inputId}
+                className={styles.input}
+                inputMode={config.inputMode}
+                autoComplete="off"
+                autoCorrect="off"
+                spellCheck={false}
+                value={values[baseKey]}
+                onChange={handleChange(baseKey)}
+                placeholder={config.placeholder}
+                aria-describedby={errorMessage ? errorId : undefined}
+              />
+              {errorMessage ? (
+                <p id={errorId} className={styles.error} role="alert">
+                  {errorMessage}
+                </p>
+              ) : (
+                <p className={styles.hint}>{config.hint}</p>
+              )}
+              <div className={styles.resultList} role="group" aria-live="polite">
+                {BASE_ORDER.filter((targetKey) => targetKey !== baseKey).map((targetKey) => {
+                  const targetConfig = BASE_CONFIG[targetKey];
+                  return (
+                    <div key={targetKey} className={styles.result}>
+                      <span className={styles.resultLabel}>{targetConfig.resultLabel}</span>
+                      <output className={styles.resultValue}>
+                        {values[targetKey] || '—'}
+                      </output>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          );
+        })}
       </div>
 
       <footer className={styles.footer}>
         <h2 className={styles.footerTitle}>Как работает перевод?</h2>
         <p>
-          Каждая позиция в двоичной записи — это степень двойки. Чтобы получить десятичное значение,
-          сложите степени двойки, которые соответствуют единицам. Например, число 1011 = 8 + 0 + 2 + 1 = 11.
+          Каждая позиция в записи — это степень основания системы счисления. Чтобы получить десятичное значение,
+          сложите степени основания, соответствующие ненулевым цифрам. Например, шестнадцатеричное FF = 15 · 16 + 15 = 255.
         </p>
       </footer>
     </section>
